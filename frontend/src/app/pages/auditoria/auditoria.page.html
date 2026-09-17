@@ -1,0 +1,104 @@
+<section class="audit-wrapper">
+
+  <div class="audit-title-row">
+
+    <h1>
+      🛡️ Registro de Auditoría y Seguridad (MSAL / JWT)
+    </h1>
+
+    <span class="live-badge">
+      Monitoreo en Tiempo Real
+    </span>
+
+  </div>
+
+  @if (loading) {
+    <div class="audit-message">
+      Cargando eventos de auditoría...
+    </div>
+  }
+
+  @if (errorMessage) {
+    <div class="audit-error">
+      {{ errorMessage }}
+    </div>
+  }
+
+  @if (!loading && !errorMessage && eventos.length === 0) {
+    <div class="audit-message">
+      No existen eventos de auditoría registrados.
+    </div>
+  }
+
+  @if (eventos.length > 0) {
+
+    <div class="audit-card">
+
+      <table class="audit-table">
+
+        <thead>
+          <tr>
+            <th>Fecha/Hora</th>
+            <th>Envío</th>
+            <th>Código Seguimiento</th>
+            <th>Estado</th>
+            <th>Servicio</th>
+            <th>Destinatario</th>
+          </tr>
+        </thead>
+
+        <tbody>
+
+          @for (evento of eventos; track evento.id) {
+
+            <tr>
+
+              <td>
+                {{ evento.fecha | date:'dd/MM/yyyy HH:mm:ss' }}
+              </td>
+
+              <td>
+                #{{ evento.shipmentId }}
+              </td>
+
+              <td class="tracking-code">
+                {{ evento.codigoSeguimiento }}
+              </td>
+
+              <td>
+
+                <span
+                  class="status-badge"
+                  [class.status-created]="evento.estado === 'CREADO'"
+                  [class.status-accepted]="evento.estado === 'ACEPTADO'"
+                  [class.status-storage]="evento.estado === 'EN_BODEGA'"
+                  [class.status-route]="evento.estado === 'EN_RUTA'"
+                  [class.status-delivered]="evento.estado === 'ENTREGADO'"
+                  [class.status-cancelled]="evento.estado === 'CANCELADO'"
+                >
+                  {{ evento.estado }}
+                </span>
+
+              </td>
+
+              <td>
+                {{ evento.servicio || '-' }}
+              </td>
+
+              <td>
+                {{ evento.correoDestinatario }}
+              </td>
+
+            </tr>
+
+          }
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  }
+
+</section>

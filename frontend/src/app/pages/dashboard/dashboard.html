@@ -1,0 +1,83 @@
+<div class="container my-4">
+
+  <div class="d-flex justify-content-between align-items-center mb-4">
+
+    <div>
+
+      <h2>
+        Panel de Control - RutaExpress
+      </h2>
+
+      <p class="text-muted mb-1">
+        Usuario conectado:
+        <strong>
+          {{ userEmail }}
+        </strong>
+      </p>
+
+      <p class="text-muted mb-0">
+
+        Rol asignado:
+
+        <span
+          *ngFor="let role of userRoles"
+          class="badge bg-secondary me-1">
+          {{ role }}
+        </span>
+
+      </p>
+
+    </div>
+
+    <button
+      class="btn btn-danger invisible"
+      type="button">
+      Cerrar Sesión
+    </button>
+
+  </div>
+
+  <!-- Indicadores de Envíos -->
+  <div class="row g-3 mb-4">
+
+    <div class="col-md-6">
+
+      <div class="card text-center p-4 shadow-sm border-0">
+
+        <h5 class="text-muted">
+          Envíos Activos
+        </h5>
+
+        <h1 class="display-3 fw-bold text-primary">
+          {{ enviosActivos }}
+        </h1>
+
+      </div>
+
+    </div>
+
+    <div class="col-md-6">
+
+      <div class="card text-center p-4 shadow-sm border-0">
+
+        <h5 class="text-muted">
+          Entregados Hoy
+        </h5>
+
+        <h1 class="display-3 fw-bold text-success">
+          {{ entregadosHoy }}
+        </h1>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <button
+    class="btn btn-primary btn-lg"
+    routerLink="/shipments">
+    Ir al Módulo de Envíos
+  </button>
+
+</div>

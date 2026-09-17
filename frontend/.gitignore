@@ -1,0 +1,24 @@
+# Dependencias de Node (no deben ir a GitHub)
+/node_modules
+
+# Archivos de compilación y caché de Angular
+/.angular
+/dist
+/tmp
+/out-tsc
+
+# Configuración local de IDEs y editores
+/.vscode/*
+!/.vscode/tasks.json
+!/.vscode/launch.json
+!/.vscode/extensions.json
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Registros y archivos del sistema
+*.log
+.DS_Store
+Thumbs.db

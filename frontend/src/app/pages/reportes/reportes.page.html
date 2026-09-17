@@ -1,0 +1,95 @@
+<div class="reportes-container">
+
+  <div class="header">
+    <div>
+      <h1>Reportes</h1>
+      <p>Resumen operacional de RutaExpress</p>
+    </div>
+
+    <button (click)="cargarReportes()">
+      Actualizar
+    </button>
+  </div>
+
+  @if (errorMessage) {
+    <div class="error">
+      {{ errorMessage }}
+    </div>
+  }
+
+  <h2>KPIs - Últimas 24 horas</h2>
+
+  <div class="kpi-grid">
+
+    <div class="kpi-card">
+      <span>Total eventos</span>
+      <strong>{{ kpis.totalEventos }}</strong>
+    </div>
+
+    <div class="kpi-card">
+      <span>Creados</span>
+      <strong>{{ kpis.creados }}</strong>
+    </div>
+
+    <div class="kpi-card">
+      <span>Aceptados</span>
+      <strong>{{ kpis.aceptados }}</strong>
+    </div>
+
+    <div class="kpi-card">
+      <span>En bodega</span>
+      <strong>{{ kpis.enBodega }}</strong>
+    </div>
+
+    <div class="kpi-card">
+      <span>En ruta</span>
+      <strong>{{ kpis.enRuta }}</strong>
+    </div>
+
+    <div class="kpi-card">
+      <span>Entregados</span>
+      <strong>{{ kpis.entregados }}</strong>
+    </div>
+
+    <div class="kpi-card">
+      <span>Cancelados</span>
+      <strong>{{ kpis.cancelados }}</strong>
+    </div>
+
+  </div>
+
+  <h2>Servicios más utilizados - Últimos 7 días</h2>
+
+  @if (serviciosArray.length > 0) {
+
+    <div class="tabla-container">
+
+      <table>
+        <thead>
+          <tr>
+            <th>Servicio</th>
+            <th>Cantidad de eventos</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          @for (servicio of serviciosArray; track servicio.nombre) {
+            <tr>
+              <td>{{ servicio.nombre }}</td>
+              <td>{{ servicio.cantidad }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+
+    </div>
+
+  } @else {
+
+    <div class="mensaje">
+      Todavía no hay datos de servicios para mostrar.
+    </div>
+
+  }
+
+</div>

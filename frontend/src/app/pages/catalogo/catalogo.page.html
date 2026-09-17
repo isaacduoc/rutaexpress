@@ -1,0 +1,204 @@
+<div class="container my-4">
+
+  <div class="d-flex justify-content-between align-items-center mb-4">
+
+    <h3>
+      🗂️ Catálogo de Servicios y Tarifas
+    </h3>
+
+    <button
+      class="btn btn-primary btn-sm"
+      type="button"
+      (click)="alternarFormulario()">
+
+      @if (!mostrarFormulario) {
+        + Agregar Servicio
+      } @else {
+        Cerrar Formulario
+      }
+
+    </button>
+
+  </div>
+
+  @if (successMessage) {
+    <div class="alert alert-success">
+      {{ successMessage }}
+    </div>
+  }
+
+  @if (errorMessage) {
+    <div class="alert alert-danger">
+      {{ errorMessage }}
+    </div>
+  }
+
+  @if (mostrarFormulario) {
+
+    <div class="card shadow-sm border-0 mb-4">
+
+      <div class="card-body">
+
+        <h5 class="mb-3">
+          Nuevo Servicio
+        </h5>
+
+        <div class="row g-3">
+
+          <div class="col-md-4">
+
+            <label class="form-label">
+              Nombre del servicio
+            </label>
+
+            <input
+              type="text"
+              class="form-control"
+              [(ngModel)]="nuevoServicio.nombre"
+              placeholder="Ej: Express Nacional">
+
+          </div>
+
+          <div class="col-md-4">
+
+            <label class="form-label">
+              Tarifa base
+            </label>
+
+            <input
+              type="number"
+              class="form-control"
+              [(ngModel)]="nuevoServicio.tarifaBase"
+              min="1"
+              placeholder="Ej: 5500">
+
+          </div>
+
+          <div class="col-md-4">
+
+            <label class="form-label">
+              Capacidad disponible
+            </label>
+
+            <input
+              type="number"
+              class="form-control"
+              [(ngModel)]="nuevoServicio.capacidadDisponible"
+              min="1"
+              placeholder="Ej: 100">
+
+          </div>
+
+        </div>
+
+        <div class="d-flex gap-2 mt-4">
+
+          <button
+            class="btn btn-success"
+            type="button"
+            [disabled]="creandoServicio"
+            (click)="crearServicio()">
+
+            @if (creandoServicio) {
+              Guardando...
+            } @else {
+              Guardar Servicio
+            }
+
+          </button>
+
+          <button
+            class="btn btn-secondary"
+            type="button"
+            [disabled]="creandoServicio"
+            (click)="alternarFormulario()">
+            Cancelar
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  }
+
+  @if (loading) {
+    <div class="alert alert-info">
+      Cargando servicios...
+    </div>
+  }
+
+  @if (!loading && !errorMessage && servicios.length === 0) {
+    <div class="alert alert-secondary">
+      No existen servicios registrados.
+    </div>
+  }
+
+  @if (servicios.length > 0) {
+
+    <div class="table-responsive bg-white shadow-sm rounded p-3">
+
+      <table class="table table-hover align-middle">
+
+        <thead class="table-dark">
+          <tr>
+            <th>ID</th>
+            <th>Tipo de Servicio</th>
+            <th>Tarifa Base</th>
+            <th>Capacidad Disponible</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+
+        <tbody>
+
+          @for (servicio of servicios; track servicio.id) {
+
+            <tr>
+
+              <td>
+                <strong>
+                  {{ servicio.id }}
+                </strong>
+              </td>
+
+              <td>
+                {{ servicio.nombre }}
+              </td>
+
+              <td>
+                ${{ servicio.tarifaBase }}
+              </td>
+
+              <td>
+                {{ servicio.capacidadDisponible }}
+              </td>
+
+              <td>
+
+                @if (servicio.capacidadDisponible > 0) {
+                  <span class="badge bg-success">
+                    Activo
+                  </span>
+                } @else {
+                  <span class="badge bg-danger">
+                    Sin capacidad
+                  </span>
+                }
+
+              </td>
+
+            </tr>
+
+          }
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  }
+
+</div>

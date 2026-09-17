@@ -1,0 +1,593 @@
+<div style="padding: 2rem; font-family: system-ui, sans-serif; max-width: 1000px; margin: 0 auto;">
+
+  <div
+    style="
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    "
+  >
+    <h1 style="margin: 0; color: #111827;">
+      Módulo de Envíos
+    </h1>
+
+    <a
+      routerLink="/dashboard"
+      style="
+        padding: 8px 16px;
+        background-color: #4b5563;
+        color: white;
+        text-decoration: none;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 600;
+      "
+    >
+      ← Volver al Dashboard
+    </a>
+  </div>
+
+  <div
+    style="
+      margin-bottom: 2rem;
+      padding: 1.5rem;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      background-color: #ffffff;
+    "
+  >
+
+    <h2 style="margin-top: 0;">
+      Crear nuevo envío
+    </h2>
+
+    @if (successMessage) {
+      <div
+        style="
+          margin-bottom: 1rem;
+          padding: 10px;
+          background-color: #dcfce7;
+          color: #166534;
+          border-radius: 6px;
+        "
+      >
+        {{ successMessage }}
+      </div>
+    }
+
+    @if (errorMessage) {
+      <div
+        style="
+          margin-bottom: 1rem;
+          padding: 10px;
+          background-color: #fee2e2;
+          color: #991b1b;
+          border-radius: 6px;
+        "
+      >
+        {{ errorMessage }}
+      </div>
+    }
+
+    <form
+      #envioForm="ngForm"
+      (ngSubmit)="crearEnvio()"
+      style="
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+      "
+    >
+
+      <div>
+        <label
+          for="correoRemitente"
+          style="
+            display: block;
+            margin-bottom: 4px;
+            font-weight: 600;
+          "
+        >
+          Correo remitente
+        </label>
+
+        <input
+          id="correoRemitente"
+          name="correoRemitente"
+          type="email"
+          [(ngModel)]="nuevoEnvio.correoRemitente"
+          required
+          email
+          style="
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+          "
+        >
+      </div>
+
+      <div>
+        <label
+          for="nombreDestinatario"
+          style="
+            display: block;
+            margin-bottom: 4px;
+            font-weight: 600;
+          "
+        >
+          Nombre destinatario
+        </label>
+
+        <input
+          id="nombreDestinatario"
+          name="nombreDestinatario"
+          type="text"
+          [(ngModel)]="nuevoEnvio.nombreDestinatario"
+          required
+          minlength="2"
+          style="
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+          "
+        >
+      </div>
+
+      <div>
+        <label
+          for="correoDestinatario"
+          style="
+            display: block;
+            margin-bottom: 4px;
+            font-weight: 600;
+          "
+        >
+          Correo destinatario
+        </label>
+
+        <input
+          id="correoDestinatario"
+          name="correoDestinatario"
+          type="email"
+          [(ngModel)]="nuevoEnvio.correoDestinatario"
+          required
+          email
+          style="
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+          "
+        >
+      </div>
+
+      <div>
+        <label
+          for="servicio"
+          style="
+            display: block;
+            margin-bottom: 4px;
+            font-weight: 600;
+          "
+        >
+          Servicio
+        </label>
+
+        <select
+          id="servicio"
+          name="servicio"
+          [(ngModel)]="nuevoEnvio.servicio"
+          required
+          style="
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            background-color: white;
+          "
+        >
+
+          <option value="">
+            Seleccione un servicio
+          </option>
+
+          @for (service of services; track service.id) {
+            <option [value]="service.nombre">
+              {{ service.nombre }}
+              - ${{ service.tarifaBase }}
+              - Capacidad: {{ service.capacidadDisponible }}
+            </option>
+          }
+
+        </select>
+      </div>
+
+      <div>
+        <label
+          for="direccionOrigen"
+          style="
+            display: block;
+            margin-bottom: 4px;
+            font-weight: 600;
+          "
+        >
+          Dirección origen
+        </label>
+
+        <input
+          id="direccionOrigen"
+          name="direccionOrigen"
+          type="text"
+          [(ngModel)]="nuevoEnvio.direccionOrigen"
+          required
+          minlength="3"
+          style="
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+          "
+        >
+      </div>
+
+      <div>
+        <label
+          for="direccionDestino"
+          style="
+            display: block;
+            margin-bottom: 4px;
+            font-weight: 600;
+          "
+        >
+          Dirección destino
+        </label>
+
+        <input
+          id="direccionDestino"
+          name="direccionDestino"
+          type="text"
+          [(ngModel)]="nuevoEnvio.direccionDestino"
+          required
+          minlength="3"
+          style="
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+          "
+        >
+      </div>
+
+      <div
+        style="
+          grid-column: 1 / -1;
+          display: flex;
+          justify-content: flex-end;
+        "
+      >
+
+        <button
+          type="submit"
+          [disabled]="envioForm.invalid || creandoEnvio"
+          [style.opacity]="envioForm.invalid || creandoEnvio ? '0.55' : '1'"
+          [style.cursor]="envioForm.invalid || creandoEnvio ? 'not-allowed' : 'pointer'"
+          style="
+            padding: 10px 18px;
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+          "
+        >
+          @if (creandoEnvio) {
+            Creando...
+          } @else {
+            Crear envío
+          }
+        </button>
+
+      </div>
+
+    </form>
+  </div>
+
+  @if (loading) {
+    <div
+      style="
+        margin-bottom: 1rem;
+        padding: 12px;
+        background-color: #f3f4f6;
+        border-radius: 6px;
+        color: #374151;
+      "
+    >
+      Cargando envíos...
+    </div>
+  }
+
+  <div style="overflow-x: auto;">
+
+    <table
+      style="
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+        background: white;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        overflow: hidden;
+      "
+    >
+
+      <thead>
+        <tr
+          style="
+            background-color: #f9fafb;
+            border-bottom: 1px solid #e5e7eb;
+          "
+        >
+
+          <th style="padding: 12px 16px;">
+            Código
+          </th>
+
+          <th style="padding: 12px 16px;">
+            Destino
+          </th>
+
+          <th style="padding: 12px 16px;">
+            Servicio
+          </th>
+
+          <th style="padding: 12px 16px;">
+            Estado
+          </th>
+
+          <th style="padding: 12px 16px;">
+            Fecha
+          </th>
+
+          <th style="padding: 12px 16px;">
+            Acciones
+          </th>
+
+        </tr>
+      </thead>
+
+      <tbody>
+
+        @for (item of shipments; track item.id) {
+
+          <tr
+            style="
+              border-bottom: 1px solid #f3f4f6;
+            "
+          >
+
+            <td
+              style="
+                padding: 12px 16px;
+                font-weight: 600;
+                white-space: nowrap;
+              "
+            >
+              {{ item.codigoSeguimiento || item.id }}
+            </td>
+
+            <td style="padding: 12px 16px;">
+              {{ item.direccionDestino }}
+            </td>
+
+            <td style="padding: 12px 16px;">
+              {{ item.servicio }}
+            </td>
+
+            <td style="padding: 12px 16px;">
+              <span
+                style="
+                  padding: 4px 8px;
+                  border-radius: 4px;
+                  font-size: 12px;
+                  font-weight: 600;
+                  background-color: #dbeafe;
+                  color: #1e40af;
+                  white-space: nowrap;
+                "
+              >
+                {{ item.estado }}
+              </span>
+            </td>
+
+            <td
+              style="
+                padding: 12px 16px;
+                color: #6b7280;
+                white-space: nowrap;
+              "
+            >
+              {{ item.fechaCreacion || item.fecha }}
+            </td>
+
+            <td
+              style="
+                padding: 12px 16px;
+                min-width: 220px;
+              "
+            >
+
+              @if (item.estado === 'CREADO') {
+                <button
+                  type="button"
+                  [disabled]="actualizandoEstadoId !== null"
+                  (click)="cambiarEstado(item.id, 'ACEPTADO')"
+                  [style.opacity]="actualizandoEstadoId !== null ? '0.55' : '1'"
+                  [style.cursor]="actualizandoEstadoId !== null ? 'not-allowed' : 'pointer'"
+                  style="
+                    padding: 6px 10px;
+                    background-color: #2563eb;
+                    color: white;
+                    border: none;
+                    border-radius: 5px;
+                    margin-right: 6px;
+                  "
+                >
+                  @if (actualizandoEstadoId === item.id) {
+                    Procesando...
+                  } @else {
+                    Aceptar
+                  }
+                </button>
+              }
+
+              @if (item.estado === 'ACEPTADO') {
+                <button
+                  type="button"
+                  [disabled]="actualizandoEstadoId !== null"
+                  (click)="cambiarEstado(item.id, 'EN_BODEGA')"
+                  [style.opacity]="actualizandoEstadoId !== null ? '0.55' : '1'"
+                  [style.cursor]="actualizandoEstadoId !== null ? 'not-allowed' : 'pointer'"
+                  style="
+                    padding: 6px 10px;
+                    background-color: #7c3aed;
+                    color: white;
+                    border: none;
+                    border-radius: 5px;
+                    margin-right: 6px;
+                  "
+                >
+                  @if (actualizandoEstadoId === item.id) {
+                    Procesando...
+                  } @else {
+                    Enviar a bodega
+                  }
+                </button>
+              }
+
+              @if (item.estado === 'EN_BODEGA') {
+                <button
+                  type="button"
+                  [disabled]="actualizandoEstadoId !== null"
+                  (click)="cambiarEstado(item.id, 'EN_RUTA')"
+                  [style.opacity]="actualizandoEstadoId !== null ? '0.55' : '1'"
+                  [style.cursor]="actualizandoEstadoId !== null ? 'not-allowed' : 'pointer'"
+                  style="
+                    padding: 6px 10px;
+                    background-color: #d97706;
+                    color: white;
+                    border: none;
+                    border-radius: 5px;
+                    margin-right: 6px;
+                  "
+                >
+                  @if (actualizandoEstadoId === item.id) {
+                    Procesando...
+                  } @else {
+                    Salir a ruta
+                  }
+                </button>
+              }
+
+              @if (item.estado === 'EN_RUTA') {
+                <button
+                  type="button"
+                  [disabled]="actualizandoEstadoId !== null"
+                  (click)="cambiarEstado(item.id, 'ENTREGADO')"
+                  [style.opacity]="actualizandoEstadoId !== null ? '0.55' : '1'"
+                  [style.cursor]="actualizandoEstadoId !== null ? 'not-allowed' : 'pointer'"
+                  style="
+                    padding: 6px 10px;
+                    background-color: #059669;
+                    color: white;
+                    border: none;
+                    border-radius: 5px;
+                    margin-right: 6px;
+                  "
+                >
+                  @if (actualizandoEstadoId === item.id) {
+                    Procesando...
+                  } @else {
+                    Marcar entregado
+                  }
+                </button>
+              }
+
+              @if (
+                item.estado !== 'ENTREGADO' &&
+                item.estado !== 'CANCELADO'
+              ) {
+                <button
+                  type="button"
+                  [disabled]="actualizandoEstadoId !== null"
+                  (click)="cambiarEstado(item.id, 'CANCELADO')"
+                  [style.opacity]="actualizandoEstadoId !== null ? '0.55' : '1'"
+                  [style.cursor]="actualizandoEstadoId !== null ? 'not-allowed' : 'pointer'"
+                  style="
+                    padding: 6px 10px;
+                    background-color: #dc2626;
+                    color: white;
+                    border: none;
+                    border-radius: 5px;
+                  "
+                >
+                  @if (actualizandoEstadoId === item.id) {
+                    Procesando...
+                  } @else {
+                    Cancelar
+                  }
+                </button>
+              }
+
+              @if (item.estado === 'ENTREGADO') {
+                <span
+                  style="
+                    color: #047857;
+                    font-weight: 600;
+                  "
+                >
+                  Finalizado
+                </span>
+              }
+
+              @if (item.estado === 'CANCELADO') {
+                <span
+                  style="
+                    color: #991b1b;
+                    font-weight: 600;
+                  "
+                >
+                  Cancelado
+                </span>
+              }
+
+            </td>
+
+          </tr>
+
+        }
+
+        @if (!loading && shipments.length === 0) {
+          <tr>
+            <td
+              colspan="6"
+              style="
+                padding: 20px;
+                text-align: center;
+                color: #6b7280;
+              "
+            >
+              No hay envíos registrados.
+            </td>
+          </tr>
+        }
+
+      </tbody>
+
+    </table>
+
+  </div>
+
+</div>
