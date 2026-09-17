@@ -1,0 +1,70 @@
+# =========================
+# Maven / Java
+# =========================
+target/
+*.class
+*.jar
+*.war
+*.ear
+
+# Maven wrapper logs / cache
+.mvn/timing.properties
+
+# =========================
+# IDEs
+# =========================
+.vscode/
+.idea/
+*.iml
+.classpath
+.project
+.settings/
+
+# =========================
+# Sistema operativo
+# =========================
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# =========================
+# Logs
+# =========================
+*.log
+logs/
+
+# =========================
+# Archivos temporales
+# =========================
+*.tmp
+*.temp
+*.swp
+*.swo
+
+# =========================
+# Variables de entorno
+# =========================
+.env
+.env.*
+!.env.example
+
+# =========================
+# Credenciales / secretos
+# =========================
+application-local.properties
+application-local.yml
+application-secret.properties
+application-secret.yml
+
+# =========================
+# Docker
+# =========================
+docker-data/
+oracle-data/
+postgres-data/
+
+# =========================
+# Backups
+# =========================
+*.bak
+*.backup
