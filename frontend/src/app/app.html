@@ -1,47 +1,120 @@
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark px-4 mb-4 shadow-sm">
+<nav
+  class="navbar navbar-expand-lg navbar-dark bg-dark px-4 mb-4 shadow-sm"
+>
 
-  <a class="navbar-brand fw-bold text-primary"
-     routerLink="/dashboard">
+  <a
+    class="navbar-brand fw-bold text-primary"
+    routerLink="/dashboard"
+  >
     🚚 RutaExpress
   </a>
 
-  @if (isLoggedIn) {
+
+  @if (isLoggedIn && rolesCargados) {
 
     <div class="navbar-nav me-auto">
 
-      <a class="nav-link"
-         routerLink="/dashboard"
-         routerLinkActive="active">
-        📊 Dashboard
+
+      <!-- ======================== -->
+      <!-- DASHBOARD / SEGUIMIENTO -->
+      <!-- ======================== -->
+
+      <a
+        class="nav-link"
+        routerLink="/dashboard"
+        routerLinkActive="active"
+      >
+
+        @if (esCliente()) {
+
+          📍 Mi seguimiento
+
+        } @else {
+
+          📊 Dashboard
+
+        }
+
       </a>
 
-      <a class="nav-link"
-         routerLink="/shipments"
-         routerLinkActive="active">
-        📦 Envíos
-      </a>
 
-      <a class="nav-link"
-         routerLink="/catalogo"
-         routerLinkActive="active">
-        🗂️ Catálogo
-      </a>
+      <!-- ======================== -->
+      <!-- ENVIOS -->
+      <!-- Admin / Despachador / Cliente -->
+      <!-- ======================== -->
 
-      <a class="nav-link"
-         routerLink="/reportes"
-         routerLinkActive="active">
-        📈 Reportes
-      </a>
+      @if (puedeVerEnvios()) {
 
-      <a class="nav-link"
-         routerLink="/auditoria"
-         routerLinkActive="active">
-        🛡️ Auditoría
-      </a>
+        <a
+          class="nav-link"
+          routerLink="/shipments"
+          routerLinkActive="active"
+        >
+          📦 Envíos
+        </a>
+
+      }
+
+
+      <!-- ======================== -->
+      <!-- CATÁLOGO -->
+      <!-- Admin / Despachador -->
+      <!-- ======================== -->
+
+      @if (puedeVerCatalogo()) {
+
+        <a
+          class="nav-link"
+          routerLink="/catalogo"
+          routerLinkActive="active"
+        >
+          🗂️ Catálogo
+        </a>
+
+      }
+
+
+      <!-- ======================== -->
+      <!-- REPORTES -->
+      <!-- Solo Admin -->
+      <!-- ======================== -->
+
+      @if (puedeVerReportes()) {
+
+        <a
+          class="nav-link"
+          routerLink="/reportes"
+          routerLinkActive="active"
+        >
+          📈 Reportes
+        </a>
+
+      }
+
+
+      <!-- ======================== -->
+      <!-- AUDITORÍA -->
+      <!-- Admin / Auditor -->
+      <!-- ======================== -->
+
+      @if (puedeVerAuditoria()) {
+
+        <a
+          class="nav-link"
+          routerLink="/auditoria"
+          routerLinkActive="active"
+        >
+          🛡️ Auditoría
+        </a>
+
+      }
 
     </div>
 
-    <div class="d-flex align-items-center gap-3 text-white">
+
+    <div
+      class="d-flex align-items-center gap-3 text-white"
+    >
 
       <small class="text-light">
         {{ username }}
@@ -49,7 +122,8 @@
 
       <button
         class="btn btn-outline-danger btn-sm"
-        (click)="logout()">
+        (click)="logout()"
+      >
         Cerrar Sesión
       </button>
 
@@ -59,6 +133,10 @@
 
 </nav>
 
+
 <div class="container-fluid px-4">
-  <router-outlet></router-outlet>
+
+  <router-outlet>
+  </router-outlet>
+
 </div>

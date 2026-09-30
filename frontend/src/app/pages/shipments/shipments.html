@@ -1,593 +1,1442 @@
-<div style="padding: 2rem; font-family: system-ui, sans-serif; max-width: 1000px; margin: 0 auto;">
+<div class="shipments-page">
 
-  <div
-    style="
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1.5rem;
-    "
-  >
-    <h1 style="margin: 0; color: #111827;">
-      Módulo de Envíos
-    </h1>
+  <!-- ====================================================== -->
+  <!-- ENCABEZADO -->
+  <!-- ====================================================== -->
+
+  <div class="page-header">
+
+    <div>
+
+      <p class="page-eyebrow">
+        RutaExpress
+      </p>
+
+      <h1>
+        Módulo de Envíos
+      </h1>
+
+      <p class="page-description">
+        Gestiona tus envíos, calcula el costo estimado
+        y consulta el estado de cada pedido.
+      </p>
+
+    </div>
 
     <a
       routerLink="/dashboard"
-      style="
-        padding: 8px 16px;
-        background-color: #4b5563;
-        color: white;
-        text-decoration: none;
-        border-radius: 6px;
-        font-size: 14px;
-        font-weight: 600;
-      "
+      class="back-button"
     >
-      ← Volver al Dashboard
+
+      ←
+
+      @if (esCliente()) {
+
+        Volver a Mi seguimiento
+
+      } @else {
+
+        Volver al Dashboard
+
+      }
+
     </a>
+
   </div>
 
-  <div
-    style="
-      margin-bottom: 2rem;
-      padding: 1.5rem;
-      border: 1px solid #e5e7eb;
-      border-radius: 8px;
-      background-color: #ffffff;
-    "
-  >
 
-    <h2 style="margin-top: 0;">
-      Crear nuevo envío
-    </h2>
+  <!-- ====================================================== -->
+  <!-- FORMULARIO NUEVO ENVÍO -->
+  <!-- ====================================================== -->
 
-    @if (successMessage) {
-      <div
-        style="
-          margin-bottom: 1rem;
-          padding: 10px;
-          background-color: #dcfce7;
-          color: #166534;
-          border-radius: 6px;
-        "
-      >
-        {{ successMessage }}
-      </div>
-    }
+  @if (puedeCrearEnvio()) {
 
-    @if (errorMessage) {
-      <div
-        style="
-          margin-bottom: 1rem;
-          padding: 10px;
-          background-color: #fee2e2;
-          color: #991b1b;
-          border-radius: 6px;
-        "
-      >
-        {{ errorMessage }}
-      </div>
-    }
+    <section class="shipment-card create-card">
 
-    <form
-      #envioForm="ngForm"
-      (ngSubmit)="crearEnvio()"
-      style="
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 1rem;
-      "
-    >
+      <div class="section-heading">
 
-      <div>
-        <label
-          for="correoRemitente"
-          style="
-            display: block;
-            margin-bottom: 4px;
-            font-weight: 600;
-          "
-        >
-          Correo remitente
-        </label>
+        <div class="section-icon">
+          📦
+        </div>
 
-        <input
-          id="correoRemitente"
-          name="correoRemitente"
-          type="email"
-          [(ngModel)]="nuevoEnvio.correoRemitente"
-          required
-          email
-          style="
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
-          "
-        >
+        <div>
+
+          <h2>
+            Crear nuevo envío
+          </h2>
+
+          <p>
+            Completa los datos del envío y las características
+            físicas del paquete para obtener una cotización.
+          </p>
+
+        </div>
+
       </div>
 
-      <div>
-        <label
-          for="nombreDestinatario"
-          style="
-            display: block;
-            margin-bottom: 4px;
-            font-weight: 600;
-          "
-        >
-          Nombre destinatario
-        </label>
 
-        <input
-          id="nombreDestinatario"
-          name="nombreDestinatario"
-          type="text"
-          [(ngModel)]="nuevoEnvio.nombreDestinatario"
-          required
-          minlength="2"
-          style="
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
-          "
-        >
-      </div>
+      <!-- MENSAJES -->
 
-      <div>
-        <label
-          for="correoDestinatario"
-          style="
-            display: block;
-            margin-bottom: 4px;
-            font-weight: 600;
-          "
-        >
-          Correo destinatario
-        </label>
+      @if (successMessage) {
 
-        <input
-          id="correoDestinatario"
-          name="correoDestinatario"
-          type="email"
-          [(ngModel)]="nuevoEnvio.correoDestinatario"
-          required
-          email
-          style="
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
-          "
-        >
-      </div>
+        <div class="alert alert-success">
 
-      <div>
-        <label
-          for="servicio"
-          style="
-            display: block;
-            margin-bottom: 4px;
-            font-weight: 600;
-          "
-        >
-          Servicio
-        </label>
+          <span>✓</span>
 
-        <select
-          id="servicio"
-          name="servicio"
-          [(ngModel)]="nuevoEnvio.servicio"
-          required
-          style="
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
-            background-color: white;
-          "
-        >
+          <span>
+            {{ successMessage }}
+          </span>
 
-          <option value="">
-            Seleccione un servicio
-          </option>
+        </div>
 
-          @for (service of services; track service.id) {
-            <option [value]="service.nombre">
-              {{ service.nombre }}
-              - ${{ service.tarifaBase }}
-              - Capacidad: {{ service.capacidadDisponible }}
-            </option>
-          }
+      }
 
-        </select>
-      </div>
 
-      <div>
-        <label
-          for="direccionOrigen"
-          style="
-            display: block;
-            margin-bottom: 4px;
-            font-weight: 600;
-          "
-        >
-          Dirección origen
-        </label>
+      @if (errorMessage) {
 
-        <input
-          id="direccionOrigen"
-          name="direccionOrigen"
-          type="text"
-          [(ngModel)]="nuevoEnvio.direccionOrigen"
-          required
-          minlength="3"
-          style="
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
-          "
-        >
-      </div>
+        <div class="alert alert-error">
 
-      <div>
-        <label
-          for="direccionDestino"
-          style="
-            display: block;
-            margin-bottom: 4px;
-            font-weight: 600;
-          "
-        >
-          Dirección destino
-        </label>
+          <span>!</span>
 
-        <input
-          id="direccionDestino"
-          name="direccionDestino"
-          type="text"
-          [(ngModel)]="nuevoEnvio.direccionDestino"
-          required
-          minlength="3"
-          style="
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
-          "
-        >
-      </div>
+          <span>
+            {{ errorMessage }}
+          </span>
 
-      <div
-        style="
-          grid-column: 1 / -1;
-          display: flex;
-          justify-content: flex-end;
-        "
+        </div>
+
+      }
+
+
+      <form
+        #envioForm="ngForm"
+        (ngSubmit)="crearEnvio()"
       >
 
-        <button
-          type="submit"
-          [disabled]="envioForm.invalid || creandoEnvio"
-          [style.opacity]="envioForm.invalid || creandoEnvio ? '0.55' : '1'"
-          [style.cursor]="envioForm.invalid || creandoEnvio ? 'not-allowed' : 'pointer'"
-          style="
-            padding: 10px 18px;
-            background-color: #2563eb;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-weight: 600;
-          "
-        >
-          @if (creandoEnvio) {
-            Creando...
-          } @else {
-            Crear envío
-          }
-        </button>
 
-      </div>
+        <!-- ================================================= -->
+        <!-- DATOS DEL ENVÍO -->
+        <!-- ================================================= -->
 
-    </form>
-  </div>
+        <div class="form-section">
 
-  @if (loading) {
-    <div
-      style="
-        margin-bottom: 1rem;
-        padding: 12px;
-        background-color: #f3f4f6;
-        border-radius: 6px;
-        color: #374151;
-      "
-    >
-      Cargando envíos...
-    </div>
-  }
+          <div class="form-section-title">
 
-  <div style="overflow-x: auto;">
+            <span class="step-number">
+              1
+            </span>
 
-    <table
-      style="
-        width: 100%;
-        border-collapse: collapse;
-        text-align: left;
-        background: white;
-        border: 1px solid #e5e7eb;
-        border-radius: 8px;
-        overflow: hidden;
-      "
-    >
+            <div>
 
-      <thead>
-        <tr
-          style="
-            background-color: #f9fafb;
-            border-bottom: 1px solid #e5e7eb;
-          "
-        >
+              <h3>
+                Datos del envío
+              </h3>
 
-          <th style="padding: 12px 16px;">
-            Código
-          </th>
+              <p>
+                Información del remitente, destinatario
+                y servicio de transporte.
+              </p>
 
-          <th style="padding: 12px 16px;">
-            Destino
-          </th>
+            </div>
 
-          <th style="padding: 12px 16px;">
-            Servicio
-          </th>
+          </div>
 
-          <th style="padding: 12px 16px;">
-            Estado
-          </th>
 
-          <th style="padding: 12px 16px;">
-            Fecha
-          </th>
+          <div class="form-grid">
 
-          <th style="padding: 12px 16px;">
-            Acciones
-          </th>
 
-        </tr>
-      </thead>
+            <!-- CORREO REMITENTE -->
 
-      <tbody>
+            <div class="form-group">
 
-        @for (item of shipments; track item.id) {
+              <label for="correoRemitente">
 
-          <tr
-            style="
-              border-bottom: 1px solid #f3f4f6;
+                Correo remitente
+
+                <span class="required">
+                  *
+                </span>
+
+              </label>
+
+
+              <input
+                id="correoRemitente"
+                name="correoRemitente"
+                type="email"
+                [(ngModel)]="nuevoEnvio.correoRemitente"
+                [readonly]="esCliente()"
+                [class.readonly-input]="esCliente()"
+                required
+                email
+                placeholder="remitente@correo.cl"
+              >
+
+
+              @if (esCliente()) {
+
+                <small class="field-help">
+
+                  🔒 Corresponde a tu cuenta de RutaExpress
+                  y no puede modificarse.
+
+                </small>
+
+              }
+
+            </div>
+
+
+            <!-- SERVICIO -->
+
+            <div class="form-group">
+
+              <label for="servicio">
+
+                Servicio
+
+                <span class="required">
+                  *
+                </span>
+
+              </label>
+
+
+              <select
+                id="servicio"
+                name="servicio"
+                [(ngModel)]="nuevoEnvio.servicio"
+                required
+              >
+
+                <option value="">
+                  Seleccione un servicio
+                </option>
+
+
+                @for (
+                  service of services;
+                  track service.id
+                ) {
+
+                  <option
+                    [value]="service.nombre"
+                  >
+
+                    {{ service.nombre }}
+                    ·
+                    {{ formatearPrecio(service.tarifaBase) }}
+
+                  </option>
+
+                }
+
+              </select>
+
+
+              @if (obtenerServicioSeleccionado()) {
+
+                <small class="field-help">
+
+                  Capacidad disponible:
+                  {{ obtenerServicioSeleccionado()?.capacidadDisponible }}
+
+                </small>
+
+              }
+
+            </div>
+
+
+            <!-- NOMBRE DESTINATARIO -->
+
+            <div class="form-group">
+
+              <label for="nombreDestinatario">
+
+                Nombre destinatario
+
+                <span class="required">
+                  *
+                </span>
+
+              </label>
+
+
+              <input
+                id="nombreDestinatario"
+                name="nombreDestinatario"
+                type="text"
+                [(ngModel)]="nuevoEnvio.nombreDestinatario"
+                required
+                minlength="2"
+                maxlength="120"
+                placeholder="Ej: Juan Pérez"
+              >
+
+            </div>
+
+
+            <!-- CORREO DESTINATARIO -->
+
+            <div class="form-group">
+
+              <label for="correoDestinatario">
+
+                Correo destinatario
+
+                <span class="required">
+                  *
+                </span>
+
+              </label>
+
+
+              <input
+                id="correoDestinatario"
+                name="correoDestinatario"
+                type="email"
+                [(ngModel)]="nuevoEnvio.correoDestinatario"
+                required
+                email
+                placeholder="destinatario@correo.cl"
+              >
+
+            </div>
+
+
+            <!-- ORIGEN -->
+
+            <div class="form-group">
+
+              <label for="direccionOrigen">
+
+                Dirección de origen
+
+                <span class="required">
+                  *
+                </span>
+
+              </label>
+
+
+              <input
+                id="direccionOrigen"
+                name="direccionOrigen"
+                type="text"
+                [(ngModel)]="nuevoEnvio.direccionOrigen"
+                required
+                minlength="3"
+                placeholder="Ej: Av. Providencia 1234"
+              >
+
+            </div>
+
+
+            <!-- DESTINO -->
+
+            <div class="form-group">
+
+              <label for="direccionDestino">
+
+                Dirección de destino
+
+                <span class="required">
+                  *
+                </span>
+
+              </label>
+
+
+              <input
+                id="direccionDestino"
+                name="direccionDestino"
+                type="text"
+                [(ngModel)]="nuevoEnvio.direccionDestino"
+                required
+                minlength="3"
+                placeholder="Ej: Av. Apoquindo 4500"
+              >
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- ================================================= -->
+        <!-- PAQUETE + COTIZADOR -->
+        <!-- ================================================= -->
+
+        <div class="package-layout">
+
+
+          <!-- DATOS DEL PAQUETE -->
+
+          <div class="package-section">
+
+            <div class="form-section-title">
+
+              <span class="step-number">
+                2
+              </span>
+
+              <div>
+
+                <h3>
+                  Características del paquete
+                </h3>
+
+                <p>
+                  Estas medidas permiten calcular
+                  el peso cobrable del envío.
+                </p>
+
+              </div>
+
+            </div>
+
+
+            <!-- TIPO PAQUETE -->
+
+            <div class="form-group">
+
+              <label for="tipoPaquete">
+
+                Tipo de paquete
+
+                <span class="required">
+                  *
+                </span>
+
+              </label>
+
+
+              <select
+                id="tipoPaquete"
+                name="tipoPaquete"
+                [(ngModel)]="nuevoEnvio.tipoPaquete"
+                (ngModelChange)="alCambiarTipoPaquete()"
+                required
+              >
+
+                <option value="">
+                  Seleccione el tipo de paquete
+                </option>
+
+                <option value="DOCUMENTO">
+                  📄 Documento
+                </option>
+
+                <option value="PAQUETE_PEQUENO">
+                  📦 Paquete pequeño
+                </option>
+
+                <option value="PAQUETE_MEDIANO">
+                  📦 Paquete mediano
+                </option>
+
+                <option value="PAQUETE_GRANDE">
+                  📦 Paquete grande
+                </option>
+
+              </select>
+
+            </div>
+
+
+            <!-- PESO Y DIMENSIONES -->
+
+            @if (!esDocumento()) {
+
+              <div class="form-group">
+
+                <label for="peso">
+
+                  Peso real
+
+                  <span class="required">
+                    *
+                  </span>
+
+                </label>
+
+
+                <div class="input-with-unit">
+
+                  <input
+                    id="peso"
+                    name="peso"
+                    type="number"
+                    [(ngModel)]="nuevoEnvio.peso"
+                    required
+                    min="0.01"
+                    step="0.01"
+                    placeholder="0.00"
+                  >
+
+                  <span>
+                    kg
+                  </span>
+
+                </div>
+
+              </div>
+
+
+              <div class="dimensions-block">
+
+                <label class="dimensions-label">
+
+                  Dimensiones
+
+                  <span class="required">
+                    *
+                  </span>
+
+                </label>
+
+
+                <div class="dimensions-grid">
+
+                  <div class="dimension-field">
+
+                    <span class="dimension-name">
+                      Largo
+                    </span>
+
+                    <div class="input-with-unit">
+
+                      <input
+                        id="largo"
+                        name="largo"
+                        type="number"
+                        [(ngModel)]="nuevoEnvio.largo"
+                        required
+                        min="0.1"
+                        step="0.1"
+                        placeholder="0"
+                      >
+
+                      <span>
+                        cm
+                      </span>
+
+                    </div>
+
+                  </div>
+
+
+                  <div class="dimension-field">
+
+                    <span class="dimension-name">
+                      Ancho
+                    </span>
+
+                    <div class="input-with-unit">
+
+                      <input
+                        id="ancho"
+                        name="ancho"
+                        type="number"
+                        [(ngModel)]="nuevoEnvio.ancho"
+                        required
+                        min="0.1"
+                        step="0.1"
+                        placeholder="0"
+                      >
+
+                      <span>
+                        cm
+                      </span>
+
+                    </div>
+
+                  </div>
+
+
+                  <div class="dimension-field">
+
+                    <span class="dimension-name">
+                      Alto
+                    </span>
+
+                    <div class="input-with-unit">
+
+                      <input
+                        id="alto"
+                        name="alto"
+                        type="number"
+                        [(ngModel)]="nuevoEnvio.alto"
+                        required
+                        min="0.1"
+                        step="0.1"
+                        placeholder="0"
+                      >
+
+                      <span>
+                        cm
+                      </span>
+
+                    </div>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+            } @else {
+
+              <div class="document-info">
+
+                <span class="document-info-icon">
+                  📄
+                </span>
+
+                <div>
+
+                  <strong>
+                    Envío de documento
+                  </strong>
+
+                  <p>
+                    Para documentos no necesitas ingresar peso ni dimensiones.
+                    La cotización utiliza directamente la tarifa del servicio seleccionado.
+                  </p>
+
+                </div>
+
+              </div>
+
+            }
+
+
+            <!-- VALOR DECLARADO -->
+
+            <div class="form-group">
+
+              <label for="valorDeclarado">
+                Valor declarado
+              </label>
+
+
+              <div class="input-with-unit money-input">
+
+                <span class="money-symbol">
+                  $
+                </span>
+
+                <input
+                  id="valorDeclarado"
+                  name="valorDeclarado"
+                  type="number"
+                  [(ngModel)]="nuevoEnvio.valorDeclarado"
+                  min="0"
+                  step="100"
+                  placeholder="Opcional"
+                >
+
+                <span>
+                  CLP
+                </span>
+
+              </div>
+
+
+              <small class="field-help">
+                Valor aproximado del contenido transportado.
+              </small>
+
+            </div>
+
+
+            <!-- FRÁGIL -->
+
+            @if (!esDocumento()) {
+
+              <label class="fragile-option">
+
+                <input
+                  id="fragil"
+                  name="fragil"
+                  type="checkbox"
+                  [(ngModel)]="nuevoEnvio.fragil"
+                >
+
+
+                <span class="fragile-check">
+                  ✓
+                </span>
+
+
+                <span class="fragile-content">
+
+                  <strong>
+                    📦 Contenido frágil
+                  </strong>
+
+                  <small>
+                    Requiere manipulación especial.
+                    Se aplica un recargo del 10% sobre la tarifa base.
+                  </small>
+
+                </span>
+
+              </label>
+
+            }
+
+
+            <!-- OBSERVACIONES -->
+
+            <div class="form-group observations-group">
+
+              <label for="observaciones">
+                Observaciones
+              </label>
+
+
+              <textarea
+                id="observaciones"
+                name="observaciones"
+                [(ngModel)]="nuevoEnvio.observaciones"
+                maxlength="1000"
+                rows="4"
+                placeholder="Ej: Llamar antes de entregar, no dejar en conserjería..."
+              ></textarea>
+
+
+              <small class="character-counter">
+
+                {{
+                  nuevoEnvio.observaciones?.length || 0
+                }}/1000
+
+              </small>
+
+            </div>
+
+          </div>
+
+
+          <!-- ================================================= -->
+          <!-- COTIZADOR -->
+          <!-- ================================================= -->
+
+          <aside class="quote-card">
+
+            <div class="quote-header">
+
+              <div class="quote-icon">
+                💰
+              </div>
+
+              <div>
+
+                <span class="quote-label">
+                  Cotización
+                </span>
+
+                <h3>
+                  Precio estimado
+                </h3>
+
+              </div>
+
+            </div>
+
+
+            @if (cotizacionDisponible()) {
+
+              <div class="quote-content">
+
+
+                <!-- TARIFA BASE -->
+
+                <div class="quote-row">
+
+                  <span>
+                    Tarifa base
+                  </span>
+
+                  <strong>
+                    {{
+                      formatearPrecio(
+                        obtenerTarifaBase()
+                      )
+                    }}
+                  </strong>
+
+                </div>
+
+
+                @if (!esDocumento()) {
+
+                  <!-- PESO REAL -->
+
+                  <div class="quote-row">
+
+                    <span>
+                      Peso real
+                    </span>
+
+                    <strong>
+                      {{ formatearPeso(nuevoEnvio.peso) }} kg
+                    </strong>
+
+                  </div>
+
+
+                  <!-- PESO VOLUMÉTRICO -->
+
+                  <div class="quote-row">
+
+                    <span>
+
+                      Peso volumétrico
+
+                      <span
+                        class="info-dot"
+                        title="Largo × Ancho × Alto ÷ 4000"
+                      >
+                        ?
+                      </span>
+
+                    </span>
+
+                    <strong>
+                      {{ formatearPeso(calcularPesoVolumetrico()) }} kg
+                    </strong>
+
+                  </div>
+
+
+                  <!-- PESO COBRABLE -->
+
+                  <div class="quote-row highlighted-row">
+
+                    <span>
+                      Peso cobrable
+                    </span>
+
+                    <strong>
+                      {{ formatearPeso(calcularPesoCobrable()) }} kg
+                    </strong>
+
+                  </div>
+
+
+                  <div class="quote-divider"></div>
+
+
+                  <!-- RECARGO PESO -->
+
+                  <div class="quote-row">
+
+                    <span>
+                      Recargo por peso
+                    </span>
+
+                    <strong>
+                      {{ formatearPrecio(calcularRecargoPeso()) }}
+                    </strong>
+
+                  </div>
+
+
+                  <!-- RECARGO FRÁGIL -->
+
+                  <div class="quote-row">
+
+                    <span>
+                      Recargo por fragilidad
+                    </span>
+
+                    <strong>
+                      {{ formatearPrecio(calcularRecargoFragilidad()) }}
+                    </strong>
+
+                  </div>
+
+                } @else {
+
+                  <div class="quote-row highlighted-row">
+
+                    <span>
+                      Tipo de envío
+                    </span>
+
+                    <strong>
+                      📄 Documento
+                    </strong>
+
+                  </div>
+
+                }
+
+
+                <div class="quote-divider"></div>
+
+
+                <!-- TOTAL -->
+
+                <div class="quote-total">
+
+                  <div>
+
+                    <span>
+                      Total estimado
+                    </span>
+
+                    <small>
+                      Valor referencial
+                    </small>
+
+                  </div>
+
+
+                  <strong>
+
+                    {{
+                      formatearPrecio(
+                        calcularPrecioEstimado()
+                      )
+                    }}
+
+                  </strong>
+
+                </div>
+
+
+                <div class="quote-notice">
+
+                  <span>
+                    ℹ️
+                  </span>
+
+                  <p>
+                    Esta cotización es referencial.
+                    El servidor volverá a validar la tarifa
+                    antes de registrar el envío.
+                  </p>
+
+                </div>
+
+              </div>
+
+            } @else {
+
+              <div class="empty-quote">
+
+                <div class="empty-quote-icon">
+                  📐
+                </div>
+
+                <h4>
+                  Completa los datos del envío
+                </h4>
+
+                <p>
+                  Selecciona un servicio y un tipo de envío.
+                  Para paquetes ingresa también peso y dimensiones
+                  para calcular automáticamente el precio estimado.
+                </p>
+
+              </div>
+
+            }
+
+          </aside>
+
+        </div>
+
+
+        <!-- ================================================= -->
+        <!-- ACCIONES -->
+        <!-- ================================================= -->
+
+        <div class="form-actions">
+
+          <button
+            type="button"
+            class="secondary-button"
+            [disabled]="creandoEnvio"
+            (click)="limpiarFormulario()"
+          >
+            Limpiar
+          </button>
+
+
+          <button
+            type="submit"
+            class="primary-button"
+            [disabled]="
+              envioForm.invalid ||
+              creandoEnvio ||
+              !cotizacionDisponible()
             "
           >
 
-            <td
-              style="
-                padding: 12px 16px;
-                font-weight: 600;
-                white-space: nowrap;
-              "
-            >
-              {{ item.codigoSeguimiento || item.id }}
-            </td>
+            @if (creandoEnvio) {
 
-            <td style="padding: 12px 16px;">
-              {{ item.direccionDestino }}
-            </td>
+              <span class="button-spinner"></span>
 
-            <td style="padding: 12px 16px;">
-              {{ item.servicio }}
-            </td>
+              Creando envío...
 
-            <td style="padding: 12px 16px;">
-              <span
-                style="
-                  padding: 4px 8px;
-                  border-radius: 4px;
-                  font-size: 12px;
-                  font-weight: 600;
-                  background-color: #dbeafe;
-                  color: #1e40af;
-                  white-space: nowrap;
-                "
-              >
-                {{ item.estado }}
+            } @else {
+
+              Crear envío
+
+              <span>
+                →
               </span>
-            </td>
 
-            <td
-              style="
-                padding: 12px 16px;
-                color: #6b7280;
-                white-space: nowrap;
-              "
-            >
-              {{ item.fechaCreacion || item.fecha }}
-            </td>
+            }
 
-            <td
-              style="
-                padding: 12px 16px;
-                min-width: 220px;
-              "
-            >
+          </button>
 
-              @if (item.estado === 'CREADO') {
-                <button
-                  type="button"
-                  [disabled]="actualizandoEstadoId !== null"
-                  (click)="cambiarEstado(item.id, 'ACEPTADO')"
-                  [style.opacity]="actualizandoEstadoId !== null ? '0.55' : '1'"
-                  [style.cursor]="actualizandoEstadoId !== null ? 'not-allowed' : 'pointer'"
-                  style="
-                    padding: 6px 10px;
-                    background-color: #2563eb;
-                    color: white;
-                    border: none;
-                    border-radius: 5px;
-                    margin-right: 6px;
-                  "
-                >
-                  @if (actualizandoEstadoId === item.id) {
-                    Procesando...
+        </div>
+
+      </form>
+
+    </section>
+
+  }
+
+
+  <!-- ====================================================== -->
+  <!-- LISTADO DE ENVÍOS -->
+  <!-- ====================================================== -->
+
+  <section class="shipment-card shipment-list-card">
+
+    <div class="list-header">
+
+      <div>
+
+        <h2>
+          Envíos registrados
+        </h2>
+
+        <p>
+
+          @if (esCliente()) {
+
+            Aquí puedes consultar los envíos
+            asociados a tu cuenta.
+
+          } @else {
+
+            Revisa y administra los envíos
+            actualmente registrados.
+
+          }
+
+        </p>
+
+      </div>
+
+
+      @if (!loading) {
+
+        <span class="shipment-counter">
+
+          {{ shipments.length }}
+
+          @if (shipments.length === 1) {
+
+            envío
+
+          } @else {
+
+            envíos
+
+          }
+
+        </span>
+
+      }
+
+    </div>
+
+
+    @if (loading) {
+
+      <div class="loading-state">
+
+        <span class="loading-spinner"></span>
+
+        Cargando envíos...
+
+      </div>
+
+    } @else {
+
+
+      <div class="table-container">
+
+        <table class="shipments-table">
+
+          <thead>
+
+            <tr>
+
+              <th>
+                Código
+              </th>
+
+              <th>
+                Destino
+              </th>
+
+              <th>
+                Servicio
+              </th>
+
+              <th>
+                Estado
+              </th>
+
+              <th>
+                Precio
+              </th>
+
+              <th>
+                Fecha
+              </th>
+
+              <th>
+                Acciones
+              </th>
+
+            </tr>
+
+          </thead>
+
+
+          <tbody>
+
+            @for (
+              item of shipments;
+              track item.id
+            ) {
+
+              <tr>
+
+
+                <!-- CÓDIGO -->
+
+                <td>
+
+                  <span class="tracking-code">
+                    {{ item.codigoSeguimiento || item.id }}
+                  </span>
+
+                </td>
+
+
+                <!-- DESTINO -->
+
+                <td>
+
+                  <div class="destination-cell">
+
+                    <strong>
+                      {{ item.nombreDestinatario }}
+                    </strong>
+
+                    <small>
+                      {{ item.direccionDestino }}
+                    </small>
+
+                  </div>
+
+                </td>
+
+
+                <!-- SERVICIO -->
+
+                <td>
+                  {{ item.servicio }}
+                </td>
+
+
+                <!-- ESTADO -->
+
+                <td>
+
+                  <span
+                    class="status-badge"
+
+                    [class.status-created]="
+                      item.estado === 'CREADO'
+                    "
+
+                    [class.status-accepted]="
+                      item.estado === 'ACEPTADO'
+                    "
+
+                    [class.status-warehouse]="
+                      item.estado === 'EN_BODEGA'
+                    "
+
+                    [class.status-route]="
+                      item.estado === 'EN_RUTA'
+                    "
+
+                    [class.status-delivered]="
+                      item.estado === 'ENTREGADO'
+                    "
+
+                    [class.status-cancelled]="
+                      item.estado === 'CANCELADO'
+                    "
+                  >
+
+                    {{ item.estado }}
+
+                  </span>
+
+                </td>
+
+
+                <!-- PRECIO -->
+
+                <td>
+
+                  @if (
+                    item.precioEstimado !== null &&
+                    item.precioEstimado !== undefined
+                  ) {
+
+                    <strong class="price-cell">
+
+                      {{
+                        formatearPrecio(
+                          item.precioEstimado
+                        )
+                      }}
+
+                    </strong>
+
                   } @else {
-                    Aceptar
+
+                    <span class="legacy-value">
+                      —
+                    </span>
+
                   }
-                </button>
-              }
 
-              @if (item.estado === 'ACEPTADO') {
-                <button
-                  type="button"
-                  [disabled]="actualizandoEstadoId !== null"
-                  (click)="cambiarEstado(item.id, 'EN_BODEGA')"
-                  [style.opacity]="actualizandoEstadoId !== null ? '0.55' : '1'"
-                  [style.cursor]="actualizandoEstadoId !== null ? 'not-allowed' : 'pointer'"
-                  style="
-                    padding: 6px 10px;
-                    background-color: #7c3aed;
-                    color: white;
-                    border: none;
-                    border-radius: 5px;
-                    margin-right: 6px;
-                  "
-                >
-                  @if (actualizandoEstadoId === item.id) {
-                    Procesando...
-                  } @else {
-                    Enviar a bodega
+                </td>
+
+
+                <!-- FECHA -->
+
+                <td>
+
+                  <span class="date-cell">
+                    {{ item.fechaCreacion || item.fecha }}
+                  </span>
+
+                </td>
+
+
+                <!-- ACCIONES -->
+
+                <td class="actions-cell">
+
+
+                  @if (puedeCambiarEstado()) {
+
+
+                    @if (item.estado === 'CREADO') {
+
+                      <button
+                        type="button"
+                        class="action-button action-accept"
+                        [disabled]="actualizandoEstadoId !== null"
+                        (click)="
+                          cambiarEstado(
+                            item.id,
+                            'ACEPTADO'
+                          )
+                        "
+                      >
+
+                        @if (
+                          actualizandoEstadoId === item.id
+                        ) {
+
+                          Procesando...
+
+                        } @else {
+
+                          Aceptar
+
+                        }
+
+                      </button>
+
+                    }
+
+
+                    @if (item.estado === 'ACEPTADO') {
+
+                      <button
+                        type="button"
+                        class="action-button action-warehouse"
+                        [disabled]="actualizandoEstadoId !== null"
+                        (click)="
+                          cambiarEstado(
+                            item.id,
+                            'EN_BODEGA'
+                          )
+                        "
+                      >
+                        Enviar a bodega
+                      </button>
+
+                    }
+
+
+                    @if (item.estado === 'EN_BODEGA') {
+
+                      <button
+                        type="button"
+                        class="action-button action-route"
+                        [disabled]="actualizandoEstadoId !== null"
+                        (click)="
+                          cambiarEstado(
+                            item.id,
+                            'EN_RUTA'
+                          )
+                        "
+                      >
+                        Salir a ruta
+                      </button>
+
+                    }
+
+
+                    @if (item.estado === 'EN_RUTA') {
+
+                      <button
+                        type="button"
+                        class="action-button action-delivered"
+                        [disabled]="actualizandoEstadoId !== null"
+                        (click)="
+                          cambiarEstado(
+                            item.id,
+                            'ENTREGADO'
+                          )
+                        "
+                      >
+                        Marcar entregado
+                      </button>
+
+                    }
+
+
+                    @if (
+                      item.estado !== 'ENTREGADO' &&
+                      item.estado !== 'CANCELADO'
+                    ) {
+
+                      <button
+                        type="button"
+                        class="action-button action-cancel"
+                        [disabled]="actualizandoEstadoId !== null"
+                        (click)="
+                          cambiarEstado(
+                            item.id,
+                            'CANCELADO'
+                          )
+                        "
+                      >
+                        Cancelar
+                      </button>
+
+                    }
+
                   }
-                </button>
-              }
 
-              @if (item.estado === 'EN_BODEGA') {
-                <button
-                  type="button"
-                  [disabled]="actualizandoEstadoId !== null"
-                  (click)="cambiarEstado(item.id, 'EN_RUTA')"
-                  [style.opacity]="actualizandoEstadoId !== null ? '0.55' : '1'"
-                  [style.cursor]="actualizandoEstadoId !== null ? 'not-allowed' : 'pointer'"
-                  style="
-                    padding: 6px 10px;
-                    background-color: #d97706;
-                    color: white;
-                    border: none;
-                    border-radius: 5px;
-                    margin-right: 6px;
-                  "
-                >
-                  @if (actualizandoEstadoId === item.id) {
-                    Procesando...
-                  } @else {
-                    Salir a ruta
+
+                  @if (
+                    !puedeCambiarEstado() &&
+                    item.estado !== 'ENTREGADO' &&
+                    item.estado !== 'CANCELADO'
+                  ) {
+
+                    <span class="tracking-only">
+                      📍 Solo seguimiento
+                    </span>
+
                   }
-                </button>
-              }
 
-              @if (item.estado === 'EN_RUTA') {
-                <button
-                  type="button"
-                  [disabled]="actualizandoEstadoId !== null"
-                  (click)="cambiarEstado(item.id, 'ENTREGADO')"
-                  [style.opacity]="actualizandoEstadoId !== null ? '0.55' : '1'"
-                  [style.cursor]="actualizandoEstadoId !== null ? 'not-allowed' : 'pointer'"
-                  style="
-                    padding: 6px 10px;
-                    background-color: #059669;
-                    color: white;
-                    border: none;
-                    border-radius: 5px;
-                    margin-right: 6px;
-                  "
-                >
-                  @if (actualizandoEstadoId === item.id) {
-                    Procesando...
-                  } @else {
-                    Marcar entregado
+
+                  @if (item.estado === 'ENTREGADO') {
+
+                    <span class="final-state delivered-text">
+                      ✓ Finalizado
+                    </span>
+
                   }
-                </button>
-              }
 
-              @if (
-                item.estado !== 'ENTREGADO' &&
-                item.estado !== 'CANCELADO'
-              ) {
-                <button
-                  type="button"
-                  [disabled]="actualizandoEstadoId !== null"
-                  (click)="cambiarEstado(item.id, 'CANCELADO')"
-                  [style.opacity]="actualizandoEstadoId !== null ? '0.55' : '1'"
-                  [style.cursor]="actualizandoEstadoId !== null ? 'not-allowed' : 'pointer'"
-                  style="
-                    padding: 6px 10px;
-                    background-color: #dc2626;
-                    color: white;
-                    border: none;
-                    border-radius: 5px;
-                  "
-                >
-                  @if (actualizandoEstadoId === item.id) {
-                    Procesando...
-                  } @else {
-                    Cancelar
+
+                  @if (item.estado === 'CANCELADO') {
+
+                    <span class="final-state cancelled-text">
+                      × Cancelado
+                    </span>
+
                   }
-                </button>
-              }
 
-              @if (item.estado === 'ENTREGADO') {
-                <span
-                  style="
-                    color: #047857;
-                    font-weight: 600;
-                  "
+                </td>
+
+              </tr>
+
+            }
+
+
+            @if (
+              !loading &&
+              shipments.length === 0
+            ) {
+
+              <tr>
+
+                <td
+                  colspan="7"
+                  class="empty-table"
                 >
-                  Finalizado
-                </span>
-              }
 
-              @if (item.estado === 'CANCELADO') {
-                <span
-                  style="
-                    color: #991b1b;
-                    font-weight: 600;
-                  "
-                >
-                  Cancelado
-                </span>
-              }
+                  <div class="empty-table-icon">
+                    📦
+                  </div>
 
-            </td>
+                  <strong>
+                    No hay envíos registrados
+                  </strong>
 
-          </tr>
+                  <span>
+                    Los nuevos envíos aparecerán aquí.
+                  </span>
 
-        }
+                </td>
 
-        @if (!loading && shipments.length === 0) {
-          <tr>
-            <td
-              colspan="6"
-              style="
-                padding: 20px;
-                text-align: center;
-                color: #6b7280;
-              "
-            >
-              No hay envíos registrados.
-            </td>
-          </tr>
-        }
+              </tr>
 
-      </tbody>
+            }
 
-    </table>
+          </tbody>
 
-  </div>
+        </table>
+
+      </div>
+
+    }
+
+  </section>
 
 </div>

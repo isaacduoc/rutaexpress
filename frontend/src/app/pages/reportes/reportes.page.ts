@@ -42,10 +42,8 @@ export class ReportesPage implements OnInit, OnDestroy {
 
   ngOnInit(): void {
 
-    // Carga inicial
     this.cargarReportes();
 
-    // Actualización automática cada 2 segundos
     this.intervaloActualizacion = setInterval(() => {
       this.cargarReportes();
     }, 2000);

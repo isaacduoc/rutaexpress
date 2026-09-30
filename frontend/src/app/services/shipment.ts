@@ -17,12 +17,16 @@ export class ShipmentService {
   ) {}
 
   getShipments(): Observable<any[]> {
+
     return this.http.get<any[]>(
       this.apiUrl
     );
   }
 
-  createShipment(shipment: any): Observable<any> {
+  createShipment(
+    shipment: any
+  ): Observable<any> {
+
     return this.http.post<any>(
       this.apiUrl,
       shipment
@@ -39,6 +43,24 @@ export class ShipmentService {
       {
         estado: estado
       }
+    );
+  }
+
+  /*
+   * Quita el envío de la sección operativa.
+   *
+   * El backend no lo borra físicamente:
+   * lo marca como archivado.
+   *
+   * Solo Admin y Despachador tienen
+   * permiso para llamar este endpoint.
+   */
+  archivarShipment(
+    id: number
+  ): Observable<void> {
+
+    return this.http.delete<void>(
+      `${this.apiUrl}/${id}`
     );
   }
 }

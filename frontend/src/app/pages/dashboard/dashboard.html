@@ -1,83 +1,843 @@
 <div class="container my-4">
 
-  <div class="d-flex justify-content-between align-items-center mb-4">
 
-    <div>
+  <!-- ================================================= -->
+  <!-- VISTA CLIENTE -->
+  <!-- ================================================= -->
 
-      <h2>
-        Panel de Control - RutaExpress
+  <ng-container *ngIf="esCliente(); else dashboardGeneral">
+
+
+    <!-- CABECERA -->
+
+    <div class="mb-4">
+
+      <h2 class="fw-bold mb-2">
+        📍 Mi seguimiento
       </h2>
-
-      <p class="text-muted mb-1">
-        Usuario conectado:
-        <strong>
-          {{ userEmail }}
-        </strong>
-      </p>
 
       <p class="text-muted mb-0">
 
-        Rol asignado:
+        Bienvenido,
 
-        <span
-          *ngFor="let role of userRoles"
-          class="badge bg-secondary me-1">
-          {{ role }}
-        </span>
+        <strong>
+          {{ userEmail }}
+        </strong>
+
+      </p>
+
+      <p class="text-muted">
+
+        Consulta el estado actualizado de tus pedidos.
 
       </p>
 
     </div>
 
+
+    <!-- CARGANDO -->
+
+    <div
+      *ngIf="cargandoEnvios"
+      class="alert alert-light border"
+    >
+      Cargando información...
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- CONTENIDO CLIENTE -->
+    <!-- ================================================= -->
+
+    <ng-container *ngIf="!cargandoEnvios">
+
+
+      <!-- RESUMEN -->
+
+      <div class="row g-3 mb-4">
+
+        <div class="col-md-12">
+
+          <div
+            class="card shadow-sm border-0 p-4"
+          >
+
+            <div
+              class="
+                d-flex
+                justify-content-between
+                align-items-center
+                flex-wrap
+                gap-3
+              "
+            >
+
+              <div>
+
+                <span class="text-muted">
+                  Envíos activos
+                </span>
+
+                <div
+                  class="
+                    display-5
+                    fw-bold
+                    text-primary
+                  "
+                >
+                  {{ enviosActivos }}
+                </div>
+
+                <small class="text-muted">
+                  Pedidos actualmente en proceso
+                </small>
+
+              </div>
+
+
+              <div
+                style="
+                  font-size: 3rem;
+                "
+              >
+                📦
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- ================================================= -->
+      <!-- BUSCADOR -->
+      <!-- ================================================= -->
+
+      <div
+        class="
+          card
+          shadow-sm
+          border-0
+          mb-4
+        "
+      >
+
+        <div class="card-body p-4">
+
+          <div class="mb-3">
+
+            <h4 class="mb-1">
+              Buscar pedido
+            </h4>
+
+            <p class="text-muted mb-0">
+              Ingresa el código de seguimiento de tu envío.
+            </p>
+
+          </div>
+
+
+          <form
+            (ngSubmit)="buscarEnvio()"
+          >
+
+            <div
+              class="
+                d-flex
+                gap-2
+                flex-wrap
+              "
+            >
+
+              <input
+                type="text"
+                name="codigoBusqueda"
+                [(ngModel)]="codigoBusqueda"
+                class="form-control form-control-lg"
+                placeholder="Ej: REX-C909F073"
+                autocomplete="off"
+                style="
+                  flex: 1;
+                  min-width: 250px;
+                  text-transform: uppercase;
+                "
+              >
+
+
+              <button
+                type="submit"
+                class="btn btn-primary btn-lg"
+                [disabled]="buscandoEnvio"
+              >
+
+                <span
+                  *ngIf="!buscandoEnvio"
+                >
+                  🔍 Buscar pedido
+                </span>
+
+                <span
+                  *ngIf="buscandoEnvio"
+                >
+                  Buscando...
+                </span>
+
+              </button>
+
+            </div>
+
+          </form>
+
+
+          <!-- MENSAJE DE ERROR -->
+
+          <div
+            *ngIf="mensajeBusqueda"
+            class="alert alert-warning mt-3 mb-0"
+          >
+            {{ mensajeBusqueda }}
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- ================================================= -->
+      <!-- NO TIENE ENVÍOS -->
+      <!-- ================================================= -->
+
+      <div
+        *ngIf="
+          enviosCliente.length === 0 &&
+          !envioSeleccionado
+        "
+        class="
+          card
+          shadow-sm
+          border-0
+          p-5
+          text-center
+          mb-4
+        "
+      >
+
+        <div
+          style="
+            font-size: 3rem;
+            margin-bottom: 1rem;
+          "
+        >
+          📦
+        </div>
+
+        <h4>
+          Aún no tienes envíos
+        </h4>
+
+        <p class="text-muted">
+          Cuando crees tu primer envío,
+          podrás consultar su seguimiento aquí.
+        </p>
+
+        <div>
+
+          <button
+            class="btn btn-primary"
+            routerLink="/shipments"
+          >
+            Crear mi primer envío
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <!-- ================================================= -->
+      <!-- ENVÍO ENCONTRADO -->
+      <!-- ================================================= -->
+
+      <ng-container
+        *ngIf="envioSeleccionado"
+      >
+
+
+        <!-- SEGUIMIENTO PRINCIPAL -->
+
+        <div
+          class="
+            card
+            shadow-sm
+            border-0
+            mb-4
+          "
+        >
+
+          <div class="card-body p-4">
+
+
+            <!-- CABECERA DEL PEDIDO -->
+
+            <div
+              class="
+                d-flex
+                justify-content-between
+                align-items-start
+                flex-wrap
+                gap-3
+                mb-4
+              "
+            >
+
+              <div>
+
+                <small class="text-muted">
+                  Seguimiento del pedido
+                </small>
+
+                <h4 class="mb-1">
+
+                  {{
+                    envioSeleccionado.codigoSeguimiento
+                  }}
+
+                </h4>
+
+                <span class="text-muted">
+
+                  {{
+                    envioSeleccionado.servicio
+                  }}
+
+                </span>
+
+              </div>
+
+
+              <div
+                class="
+                  d-flex
+                  align-items-center
+                  gap-2
+                "
+              >
+
+                <span
+                  *ngIf="
+                    envioSeleccionado.estado !== 'CANCELADO'
+                  "
+                  class="badge bg-primary fs-6"
+                >
+
+                  {{
+                    nombreEstado(
+                      envioSeleccionado.estado
+                    )
+                  }}
+
+                </span>
+
+
+                <span
+                  *ngIf="
+                    envioSeleccionado.estado === 'CANCELADO'
+                  "
+                  class="badge bg-danger fs-6"
+                >
+                  Cancelado
+                </span>
+
+
+                <button
+                  type="button"
+                  class="btn btn-outline-secondary btn-sm"
+                  (click)="limpiarBusqueda()"
+                >
+                  ✕ Cerrar
+                </button>
+
+              </div>
+
+            </div>
+
+
+            <!-- ORIGEN / DESTINO -->
+
+            <div class="row mb-4">
+
+              <div class="col-md-6 mb-3">
+
+                <small class="text-muted">
+                  📍 Origen
+                </small>
+
+                <div class="fw-semibold">
+
+                  {{
+                    envioSeleccionado.direccionOrigen
+                  }}
+
+                </div>
+
+              </div>
+
+
+              <div class="col-md-6 mb-3">
+
+                <small class="text-muted">
+                  🏁 Destino
+                </small>
+
+                <div class="fw-semibold">
+
+                  {{
+                    envioSeleccionado.direccionDestino
+                  }}
+
+                </div>
+
+              </div>
+
+            </div>
+
+
+            <!-- CANCELADO -->
+
+            <div
+              *ngIf="
+                envioSeleccionado.estado === 'CANCELADO'
+              "
+              class="alert alert-danger"
+            >
+              Este envío fue cancelado.
+            </div>
+
+
+            <!-- ================================================= -->
+            <!-- PROGRESO -->
+            <!-- ================================================= -->
+
+            <ng-container
+              *ngIf="
+                envioSeleccionado.estado !== 'CANCELADO'
+              "
+            >
+
+              <h6 class="mb-3">
+                Estado del envío
+              </h6>
+
+
+              <div
+                class="progress mb-4"
+                style="height: 10px;"
+              >
+
+                <div
+                  class="progress-bar"
+                  role="progressbar"
+                  [style.width.%]="
+                    porcentajeProgreso(
+                      envioSeleccionado.estado
+                    )
+                  "
+                >
+                </div>
+
+              </div>
+
+
+              <!-- PASOS -->
+
+              <div
+                class="
+                  d-flex
+                  justify-content-between
+                  text-center
+                  gap-2
+                "
+              >
+
+                <div
+                  *ngFor="
+                    let estado of estadosEnvio
+                  "
+                  style="
+                    flex: 1;
+                    min-width: 0;
+                  "
+                >
+
+                  <div
+                    class="mb-2"
+                    style="
+                      font-size: 1.4rem;
+                    "
+                  >
+
+                    {{
+                      estadoAlcanzado(estado)
+                        ? '✅'
+                        : '⚪'
+                    }}
+
+                  </div>
+
+
+                  <small
+                    [class.fw-bold]="
+                      envioSeleccionado.estado === estado
+                    "
+                    [class.text-primary]="
+                      envioSeleccionado.estado === estado
+                    "
+                  >
+
+                    {{
+                      nombreEstado(estado)
+                    }}
+
+                  </small>
+
+                </div>
+
+              </div>
+
+            </ng-container>
+
+          </div>
+
+        </div>
+
+
+        <!-- ================================================= -->
+        <!-- DETALLES -->
+        <!-- ================================================= -->
+
+        <div
+          class="
+            card
+            shadow-sm
+            border-0
+            mb-4
+          "
+        >
+
+          <div class="card-body p-4">
+
+            <h5 class="mb-3">
+              Detalles del envío
+            </h5>
+
+
+            <div class="row">
+
+              <div class="col-md-6 mb-3">
+
+                <small class="text-muted">
+                  Código de seguimiento
+                </small>
+
+                <div class="fw-semibold">
+
+                  {{
+                    envioSeleccionado.codigoSeguimiento
+                  }}
+
+                </div>
+
+              </div>
+
+
+              <div class="col-md-6 mb-3">
+
+                <small class="text-muted">
+                  Estado actual
+                </small>
+
+                <div class="fw-semibold">
+
+                  {{
+                    nombreEstado(
+                      envioSeleccionado.estado
+                    )
+                  }}
+
+                </div>
+
+              </div>
+
+
+              <div class="col-md-6 mb-3">
+
+                <small class="text-muted">
+                  Destinatario
+                </small>
+
+                <div>
+
+                  {{
+                    envioSeleccionado.nombreDestinatario
+                  }}
+
+                </div>
+
+              </div>
+
+
+              <div class="col-md-6 mb-3">
+
+                <small class="text-muted">
+                  Correo destinatario
+                </small>
+
+                <div>
+
+                  {{
+                    envioSeleccionado.correoDestinatario
+                  }}
+
+                </div>
+
+              </div>
+
+
+              <div class="col-md-6 mb-3">
+
+                <small class="text-muted">
+                  Servicio
+                </small>
+
+                <div>
+
+                  {{
+                    envioSeleccionado.servicio
+                  }}
+
+                </div>
+
+              </div>
+
+
+              <div class="col-md-6 mb-3">
+
+                <small class="text-muted">
+                  Fecha de creación
+                </small>
+
+                <div>
+
+                  {{
+                    envioSeleccionado.fechaCreacion
+                      | date:'dd/MM/yyyy HH:mm'
+                  }}
+
+                </div>
+
+              </div>
+
+
+              <div class="col-md-6 mb-3">
+
+                <small class="text-muted">
+                  Dirección de origen
+                </small>
+
+                <div>
+
+                  {{
+                    envioSeleccionado.direccionOrigen
+                  }}
+
+                </div>
+
+              </div>
+
+
+              <div class="col-md-6 mb-3">
+
+                <small class="text-muted">
+                  Dirección de destino
+                </small>
+
+                <div>
+
+                  {{
+                    envioSeleccionado.direccionDestino
+                  }}
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </ng-container>
+
+
+      <!-- ================================================= -->
+      <!-- IR A MIS ENVÍOS -->
+      <!-- ================================================= -->
+
+      <button
+        class="btn btn-outline-primary"
+        routerLink="/shipments"
+      >
+        📦 Ir a mis envíos
+      </button>
+
+    </ng-container>
+
+  </ng-container>
+
+
+
+  <!-- ================================================= -->
+  <!-- DASHBOARD ADMIN / DESPACHADOR / AUDITOR -->
+  <!-- ================================================= -->
+
+  <ng-template #dashboardGeneral>
+
+    <div
+      class="
+        d-flex
+        justify-content-between
+        align-items-center
+        mb-4
+      "
+    >
+
+      <div>
+
+        <h2>
+          Panel de Control - RutaExpress
+        </h2>
+
+        <p class="text-muted mb-1">
+
+          Usuario conectado:
+
+          <strong>
+            {{ userEmail }}
+          </strong>
+
+        </p>
+
+        <p class="text-muted mb-0">
+
+          Rol asignado:
+
+          <span
+            *ngFor="
+              let role of userRoles
+            "
+            class="
+              badge
+              bg-secondary
+              me-1
+            "
+          >
+            {{ role }}
+          </span>
+
+        </p>
+
+      </div>
+
+    </div>
+
+
+    <div class="row g-3 mb-4">
+
+      <div class="col-md-6">
+
+        <div
+          class="
+            card
+            text-center
+            p-4
+            shadow-sm
+            border-0
+          "
+        >
+
+          <h5 class="text-muted">
+            Envíos Activos
+          </h5>
+
+          <h1
+            class="
+              display-3
+              fw-bold
+              text-primary
+            "
+          >
+            {{ enviosActivos }}
+          </h1>
+
+        </div>
+
+      </div>
+
+
+      <div
+        class="col-md-6"
+        *ngIf="
+          esAdmin() ||
+          esAuditor()
+        "
+      >
+
+        <div
+          class="
+            card
+            text-center
+            p-4
+            shadow-sm
+            border-0
+          "
+        >
+
+          <h5 class="text-muted">
+            Entregados Hoy
+          </h5>
+
+          <h1
+            class="
+              display-3
+              fw-bold
+              text-success
+            "
+          >
+            {{ entregadosHoy }}
+          </h1>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
     <button
-      class="btn btn-danger invisible"
-      type="button">
-      Cerrar Sesión
+      *ngIf="
+        userRoles.includes('Admin') ||
+        userRoles.includes('Despachador')
+      "
+      class="btn btn-primary btn-lg"
+      routerLink="/shipments"
+    >
+      Ir al Módulo de Envíos
     </button>
 
-  </div>
-
-  <!-- Indicadores de Envíos -->
-  <div class="row g-3 mb-4">
-
-    <div class="col-md-6">
-
-      <div class="card text-center p-4 shadow-sm border-0">
-
-        <h5 class="text-muted">
-          Envíos Activos
-        </h5>
-
-        <h1 class="display-3 fw-bold text-primary">
-          {{ enviosActivos }}
-        </h1>
-
-      </div>
-
-    </div>
-
-    <div class="col-md-6">
-
-      <div class="card text-center p-4 shadow-sm border-0">
-
-        <h5 class="text-muted">
-          Entregados Hoy
-        </h5>
-
-        <h1 class="display-3 fw-bold text-success">
-          {{ entregadosHoy }}
-        </h1>
-
-      </div>
-
-    </div>
-
-  </div>
-
-  <button
-    class="btn btn-primary btn-lg"
-    routerLink="/shipments">
-    Ir al Módulo de Envíos
-  </button>
+  </ng-template>
 
 </div>
