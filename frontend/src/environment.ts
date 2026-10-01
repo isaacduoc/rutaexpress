@@ -13,7 +13,7 @@ export const environment = {
     authority:
       'https://login.microsoftonline.com/d4e45c2c-5598-4953-9517-f1c5f09d4eb1',
 
-    redirectUri: 'http://localhost:4200'
+    redirectUri: window.location.origin
 
   },
 
