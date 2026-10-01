@@ -1,0 +1,98 @@
+services:
+
+  shipments:
+    build:
+      context: ../../backend
+    container_name: rutaexpress-shipments
+    ports:
+      - "8080:8080"
+    environment:
+      ORACLE_URL: ${ORACLE_URL}
+      ORACLE_USERNAME: rutaexpress_shipments
+      ORACLE_PASSWORD: ${ORACLE_PASSWORD}
+      RABBITMQ_HOST: ${RABBITMQ_HOST}
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USERNAME: ${RABBITMQ_USERNAME}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
+      KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS}
+    networks:
+      - rutaexpress-net
+
+  catalog:
+    build:
+      context: ../../ms-rutaexpress-catalog
+    container_name: rutaexpress-catalog
+    ports:
+      - "8083:8083"
+    environment:
+      ORACLE_URL: ${ORACLE_URL}
+      ORACLE_USERNAME: rutaexpress_catalog
+      ORACLE_PASSWORD: ${ORACLE_PASSWORD}
+    networks:
+      - rutaexpress-net
+
+  report:
+    build:
+      context: ../../ms-rutaexpress-report
+    container_name: rutaexpress-report
+    ports:
+      - "8085:8085"
+    environment:
+      ORACLE_URL: ${ORACLE_URL}
+      ORACLE_USERNAME: rutaexpress_report
+      ORACLE_PASSWORD: ${ORACLE_PASSWORD}
+      KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS}
+    networks:
+      - rutaexpress-net
+
+  audit:
+    build:
+      context: ../../ms-rutaexpress-audit
+    container_name: rutaexpress-audit
+    ports:
+      - "8084:8084"
+    environment:
+      ORACLE_URL: ${ORACLE_URL}
+      ORACLE_USERNAME: rutaexpress_audit
+      ORACLE_PASSWORD: ${ORACLE_PASSWORD}
+      KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS}
+    networks:
+      - rutaexpress-net
+
+  notify:
+    build:
+      context: ../../ms-rutaexpress-notify
+    container_name: rutaexpress-notify
+    ports:
+      - "8082:8082"
+    environment:
+      RABBITMQ_HOST: ${RABBITMQ_HOST}
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USERNAME: ${RABBITMQ_USERNAME}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
+    networks:
+      - rutaexpress-net
+
+  bff:
+    build:
+      context: ../../ms-rutaexpress-bff
+    container_name: rutaexpress-bff
+    ports:
+      - "8081:8081"
+    environment:
+      SHIPMENTS_SERVICE_URL: http://shipments:8080/api/envios
+      CATALOG_SERVICE_URL: http://catalog:8083/api/catalog
+      REPORT_SERVICE_URL: http://report:8085/api/report
+      AUDIT_SERVICE_URL: http://audit:8084/api/audit
+    depends_on:
+      - shipments
+      - catalog
+      - report
+      - audit
+      - notify
+    networks:
+      - rutaexpress-net
+
+networks:
+  rutaexpress-net:
+    external: true
