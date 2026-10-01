@@ -1,0 +1,42 @@
+services:
+
+  rabbitmq1:
+    image: rabbitmq:3-management
+    container_name: rabbitmq1
+    hostname: rabbitmq1
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+      RABBITMQ_ERLANG_COOKIE: ${RABBITMQ_ERLANG_COOKIE}
+      RABBITMQ_NODENAME: rabbit@rabbitmq1
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq1-data:/var/lib/rabbitmq
+    networks:
+      - mq-net
+
+  rabbitmq2:
+    image: rabbitmq:3-management
+    container_name: rabbitmq2
+    hostname: rabbitmq2
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+      RABBITMQ_ERLANG_COOKIE: ${RABBITMQ_ERLANG_COOKIE}
+      RABBITMQ_NODENAME: rabbit@rabbitmq2
+    volumes:
+      - rabbitmq2-data:/var/lib/rabbitmq
+    networks:
+      - mq-net
+
+volumes:
+  rabbitmq1-data:
+  rabbitmq2-data:
+
+networks:
+  mq-net:
+    driver: bridge
