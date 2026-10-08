@@ -8,55 +8,77 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RabbitMQConfig {
 
-    public static final String EXCHANGE_DIRECT = "x.direct.envios";
-    
-    // Nombres de Colas Principales
+    // Exchanges oficiales de RutaExpress
+    public static final String EXCHANGE_DIRECT = "cmd.direct";
+    public static final String EXCHANGE_TOPIC = "cmd.topic";
+    public static final String EXCHANGE_DLX = "cmd.dead.dlx";
+
+    // Colas principales
     public static final String QUEUE_EMAIL = "q.cmd.email";
     public static final String QUEUE_WAREHOUSE = "q.cmd.warehouse";
     public static final String QUEUE_LABEL = "q.cmd.label";
 
-    // Nombres de DLQs
+    // Dead Letter Queues
     public static final String QUEUE_EMAIL_DLQ = "q.cmd.email.dlq";
     public static final String QUEUE_WAREHOUSE_DLQ = "q.cmd.warehouse.dlq";
     public static final String QUEUE_LABEL_DLQ = "q.cmd.label.dlq";
 
-    // Routing Keys
-    public static final String ROUTING_KEY_EMAIL = "cmd.email";
-    public static final String ROUTING_KEY_WAREHOUSE = "cmd.warehouse";
-    public static final String ROUTING_KEY_LABEL = "cmd.label";
+    // Routing keys del exchange directo
+    public static final String ROUTING_KEY_EMAIL = "email.send";
+    public static final String ROUTING_KEY_WAREHOUSE = "warehouse.ticket";
+    public static final String ROUTING_KEY_LABEL = "label.gen";
+
+    // Routing keys DLQ
+    public static final String ROUTING_KEY_EMAIL_DLQ = "email.dlq";
+    public static final String ROUTING_KEY_WAREHOUSE_DLQ = "warehouse.dlq";
+    public static final String ROUTING_KEY_LABEL_DLQ = "label.dlq";
 
     @Bean
-    public DirectExchange exchange() {
-        return new DirectExchange(EXCHANGE_DIRECT);
+    public DirectExchange directExchange() {
+        return new DirectExchange(EXCHANGE_DIRECT, true, false);
     }
 
-    // --- CONFIGURACIÓN DE COLAS CON DLQ ---
+    @Bean
+    public TopicExchange topicExchange() {
+        return new TopicExchange(EXCHANGE_TOPIC, true, false);
+    }
+
+    @Bean
+    public DirectExchange deadLetterExchange() {
+        return new DirectExchange(EXCHANGE_DLX, true, false);
+    }
+
+    // =========================
+    // COLAS PRINCIPALES
+    // =========================
 
     @Bean
     public Queue emailQueue() {
         return QueueBuilder.durable(QUEUE_EMAIL)
-                .withArgument("x-dead-letter-exchange", "")
-                .withArgument("x-dead-letter-routing-key", QUEUE_EMAIL_DLQ)
+                .withArgument("x-dead-letter-exchange", EXCHANGE_DLX)
+                .withArgument("x-dead-letter-routing-key", ROUTING_KEY_EMAIL_DLQ)
                 .build();
     }
 
     @Bean
     public Queue warehouseQueue() {
         return QueueBuilder.durable(QUEUE_WAREHOUSE)
-                .withArgument("x-dead-letter-exchange", "")
-                .withArgument("x-dead-letter-routing-key", QUEUE_WAREHOUSE_DLQ)
+                .withArgument("x-dead-letter-exchange", EXCHANGE_DLX)
+                .withArgument("x-dead-letter-routing-key", ROUTING_KEY_WAREHOUSE_DLQ)
                 .build();
     }
 
     @Bean
     public Queue labelQueue() {
         return QueueBuilder.durable(QUEUE_LABEL)
-                .withArgument("x-dead-letter-exchange", "")
-                .withArgument("x-dead-letter-routing-key", QUEUE_LABEL_DLQ)
+                .withArgument("x-dead-letter-exchange", EXCHANGE_DLX)
+                .withArgument("x-dead-letter-routing-key", ROUTING_KEY_LABEL_DLQ)
                 .build();
     }
 
-    // --- DECLARACIÓN DE DLQs ---
+    // =========================
+    // DEAD LETTER QUEUES
+    // =========================
 
     @Bean
     public Queue emailDlq() {
@@ -73,24 +95,81 @@ public class RabbitMQConfig {
         return QueueBuilder.durable(QUEUE_LABEL_DLQ).build();
     }
 
-    // --- BINDINGS ---
+    // =========================
+    // BINDINGS DIRECT
+    // =========================
 
     @Bean
-    public Binding emailBinding(Queue emailQueue, DirectExchange exchange) {
-        return BindingBuilder.bind(emailQueue).to(exchange).with(ROUTING_KEY_EMAIL);
+    public Binding emailDirectBinding() {
+        return BindingBuilder.bind(emailQueue())
+                .to(directExchange())
+                .with(ROUTING_KEY_EMAIL);
     }
 
     @Bean
-    public Binding warehouseBinding(Queue warehouseQueue, DirectExchange exchange) {
-        return BindingBuilder.bind(warehouseQueue).to(exchange).with(ROUTING_KEY_WAREHOUSE);
+    public Binding warehouseDirectBinding() {
+        return BindingBuilder.bind(warehouseQueue())
+                .to(directExchange())
+                .with(ROUTING_KEY_WAREHOUSE);
     }
 
     @Bean
-    public Binding labelBinding(Queue labelQueue, DirectExchange exchange) {
-        return BindingBuilder.bind(labelQueue).to(exchange).with(ROUTING_KEY_LABEL);
+    public Binding labelDirectBinding() {
+        return BindingBuilder.bind(labelQueue())
+                .to(directExchange())
+                .with(ROUTING_KEY_LABEL);
     }
 
-    // Convertidor de mensajes a JSON
+    // =========================
+    // BINDINGS TOPIC
+    // =========================
+
+    @Bean
+    public Binding emailTopicBinding() {
+        return BindingBuilder.bind(emailQueue())
+                .to(topicExchange())
+                .with("email.*");
+    }
+
+    @Bean
+    public Binding warehouseTopicBinding() {
+        return BindingBuilder.bind(warehouseQueue())
+                .to(topicExchange())
+                .with("warehouse.#");
+    }
+
+    @Bean
+    public Binding labelTopicBinding() {
+        return BindingBuilder.bind(labelQueue())
+                .to(topicExchange())
+                .with("label.*");
+    }
+
+    // =========================
+    // BINDINGS DLQ
+    // =========================
+
+    @Bean
+    public Binding emailDlqBinding() {
+        return BindingBuilder.bind(emailDlq())
+                .to(deadLetterExchange())
+                .with(ROUTING_KEY_EMAIL_DLQ);
+    }
+
+    @Bean
+    public Binding warehouseDlqBinding() {
+        return BindingBuilder.bind(warehouseDlq())
+                .to(deadLetterExchange())
+                .with(ROUTING_KEY_WAREHOUSE_DLQ);
+    }
+
+    @Bean
+    public Binding labelDlqBinding() {
+        return BindingBuilder.bind(labelDlq())
+                .to(deadLetterExchange())
+                .with(ROUTING_KEY_LABEL_DLQ);
+    }
+
     @Bean
     public Jackson2JsonMessageConverter messageConverter() {
         return new Jackson2JsonMessageConverter();
