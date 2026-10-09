@@ -3,7 +3,7 @@ export const environment = {
   production: false,
 
   // BFF
-  apiUrl: 'http://localhost:8081',
+  apiUrl: 'https://45owu90zfg.execute-api.us-east-1.amazonaws.com',
 
   azure: {
 
