@@ -50,7 +50,7 @@ export class AppComponent implements OnInit {
     inject(Router);
 
   private cdr =
-  inject(ChangeDetectorRef);
+    inject(ChangeDetectorRef);
 
 
   ngOnInit(): void {
@@ -193,63 +193,66 @@ export class AppComponent implements OnInit {
    */
 
   private cargarRoles(
-  account: AccountInfo
-): void {
+    account: AccountInfo
+  ): void {
 
-  this.msalService
-    .acquireTokenSilent({
+    this.msalService
+      .acquireTokenSilent({
 
-      account,
+        account,
 
-      scopes: [
-        environment.rutaExpressScope
-      ]
+        scopes: [
+          environment.rutaExpressScope
+        ],
 
-    })
-    .subscribe({
+        redirectUri:
+          environment.azure.silentRedirectUri
 
-      next: (result) => {
+      })
+      .subscribe({
 
-        const claims =
-          this.decodeJwtPayload(
-            result.accessToken
+        next: (result) => {
+
+          const claims =
+            this.decodeJwtPayload(
+              result.accessToken
+            );
+
+          this.userRoles =
+            claims?.roles ?? [];
+
+          this.rolesCargados = true;
+
+          console.log(
+            'Roles Navbar:',
+            this.userRoles
           );
 
-        this.userRoles =
-          claims?.roles ?? [];
+          /*
+           * Fuerza a Angular a actualizar
+           * inmediatamente el navbar.
+           */
+          this.cdr.detectChanges();
 
-        this.rolesCargados = true;
+        },
 
-        console.log(
-          'Roles Navbar:',
-          this.userRoles
-        );
+        error: (error) => {
 
-        /*
-         * Fuerza a Angular a actualizar
-         * inmediatamente el navbar.
-         */
-        this.cdr.detectChanges();
+          console.error(
+            'Error obteniendo roles del Navbar:',
+            error
+          );
 
-      },
+          this.userRoles = [];
 
-      error: (error) => {
+          this.rolesCargados = true;
 
-        console.error(
-          'Error obteniendo roles del Navbar:',
-          error
-        );
+          this.cdr.detectChanges();
 
-        this.userRoles = [];
+        }
 
-        this.rolesCargados = true;
-
-        this.cdr.detectChanges();
-
-      }
-
-    });
-}
+      });
+  }
 
 
   /*
@@ -392,7 +395,7 @@ export class AppComponent implements OnInit {
         account ?? undefined,
 
       postLogoutRedirectUri:
-        'http://localhost:4200/login'
+        environment.azure.redirectUri
 
     });
 

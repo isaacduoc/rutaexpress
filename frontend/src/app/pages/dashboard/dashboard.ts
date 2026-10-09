@@ -127,7 +127,10 @@ export class DashboardComponent implements OnInit {
 
         scopes: [
           environment.rutaExpressScope
-        ]
+        ],
+
+        redirectUri:
+          environment.azure.silentRedirectUri
 
       })
       .subscribe({

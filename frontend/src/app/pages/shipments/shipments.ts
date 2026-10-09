@@ -140,7 +140,10 @@ export class ShipmentsComponent implements OnInit {
 
         scopes: [
           environment.rutaExpressScope
-        ]
+        ],
+
+        redirectUri:
+          environment.azure.silentRedirectUri
 
       })
       .subscribe({

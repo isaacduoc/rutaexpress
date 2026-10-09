@@ -129,7 +129,10 @@ export const roleGuard: CanActivateFn = (route) => {
 
           scopes: [
             environment.rutaExpressScope
-          ]
+          ],
+
+          redirectUri:
+            environment.azure.silentRedirectUri
 
         }).pipe(
 

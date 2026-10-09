@@ -67,7 +67,7 @@ export function MSALInterceptorConfigFactory(): MsalInterceptorConfiguration {
     new Map<string, Array<string>>();
 
   protectedResourceMap.set(
-    'http://localhost:8081/bff/v1/*',
+    `${environment.apiUrl}/api/*`,
     [
       environment.rutaExpressScope
     ]
