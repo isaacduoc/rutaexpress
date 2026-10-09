@@ -248,7 +248,8 @@ public class SecurityConfig {
 
         configuration.setAllowedOrigins(
             List.of(
-                "http://localhost:4200"
+                "http://localhost:4200",
+                "https://rutaexpress-duoc.netlify.app"
             )
         );
 
@@ -257,6 +258,7 @@ public class SecurityConfig {
                 "GET",
                 "POST",
                 "PUT",
+                "PATCH",
                 "DELETE",
                 "OPTIONS"
             )
