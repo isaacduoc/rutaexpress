@@ -16,12 +16,14 @@ export class ShipmentService {
     private http: HttpClient
   ) {}
 
+
   getShipments(): Observable<any[]> {
 
     return this.http.get<any[]>(
       this.apiUrl
     );
   }
+
 
   createShipment(
     shipment: any
@@ -32,6 +34,7 @@ export class ShipmentService {
       shipment
     );
   }
+
 
   changeStatus(
     id: number,
@@ -46,7 +49,8 @@ export class ShipmentService {
     );
   }
 
-  /*
+
+  /**
    * Quita el envío de la sección operativa.
    *
    * El backend no lo borra físicamente:
@@ -63,4 +67,5 @@ export class ShipmentService {
       `${this.apiUrl}/${id}`
     );
   }
+
 }

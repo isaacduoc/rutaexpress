@@ -2,23 +2,28 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
+import { environment } from '../../environment';
+
 @Injectable({
   providedIn: 'root'
 })
 export class AuditService {
 
   private readonly baseUrl =
-    'http://localhost:8081/bff/v1/audit';
+    `${environment.apiUrl}/bff/v1/audit`;
 
   constructor(
     private http: HttpClient
   ) {}
 
+
   getEventos(): Observable<any[]> {
+
     return this.http.get<any[]>(
       this.baseUrl
     );
   }
+
 
   getEventosPorEnvio(
     shipmentId: number
@@ -29,6 +34,7 @@ export class AuditService {
     );
   }
 
+
   getEventosPorTracking(
     codigoSeguimiento: string
   ): Observable<any[]> {
@@ -37,6 +43,7 @@ export class AuditService {
       `${this.baseUrl}/tracking/${codigoSeguimiento}`
     );
   }
+
 
   getEntregadosHoy(): Observable<{
     entregadosHoy: number
@@ -48,4 +55,5 @@ export class AuditService {
       `${this.baseUrl}/entregados-hoy`
     );
   }
+
 }

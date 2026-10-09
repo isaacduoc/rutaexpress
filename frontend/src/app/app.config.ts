@@ -33,23 +33,32 @@ import {
 import { environment } from '../environment';
 
 export function MSALInstanceFactory() {
+
   return new PublicClientApplication({
+
     auth: {
       clientId: environment.azure.clientId,
       authority: environment.azure.authority,
       redirectUri: environment.azure.redirectUri,
-      postLogoutRedirectUri: environment.azure.redirectUri
+      postLogoutRedirectUri:
+        environment.azure.redirectUri
     },
 
     cache: {
       cacheLocation: 'localStorage'
     }
+
   });
 }
 
-export function MSALGuardConfigFactory(): MsalGuardConfiguration {
+
+export function MSALGuardConfigFactory():
+  MsalGuardConfiguration {
+
   return {
-    interactionType: InteractionType.Redirect,
+
+    interactionType:
+      InteractionType.Redirect,
 
     authRequest: {
       scopes: [
@@ -58,28 +67,37 @@ export function MSALGuardConfigFactory(): MsalGuardConfiguration {
     },
 
     loginFailedRoute: '/login'
+
   };
 }
 
-export function MSALInterceptorConfigFactory(): MsalInterceptorConfiguration {
+
+export function MSALInterceptorConfigFactory():
+  MsalInterceptorConfiguration {
 
   const protectedResourceMap =
     new Map<string, Array<string>>();
 
   protectedResourceMap.set(
-    `${environment.apiUrl}/api/*`,
+    `${environment.apiUrl}/bff/v1/*`,
     [
       environment.rutaExpressScope
     ]
   );
 
   return {
-    interactionType: InteractionType.Redirect,
+
+    interactionType:
+      InteractionType.Redirect,
+
     protectedResourceMap
+
   };
 }
 
-export const appConfig: ApplicationConfig = {
+
+export const appConfig:
+  ApplicationConfig = {
 
   providers: [
 
@@ -111,7 +129,8 @@ export const appConfig: ApplicationConfig = {
 
     {
       provide: MSAL_INTERCEPTOR_CONFIG,
-      useFactory: MSALInterceptorConfigFactory
+      useFactory:
+        MSALInterceptorConfigFactory
     },
 
     MsalService,
@@ -119,4 +138,5 @@ export const appConfig: ApplicationConfig = {
     MsalGuard
 
   ]
+
 };
