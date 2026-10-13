@@ -59,8 +59,7 @@ public class EnvioService {
 
 
     private static final String CATALOG_URL =
-
-            "http://localhost:8083/api/catalog";
+        "http://rutaexpress-catalog:8083/api/catalog";
 
 
 
