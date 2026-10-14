@@ -43,6 +43,12 @@ export class AppComponent implements OnInit {
    */
   userRoles: string[] = [];
 
+  /*
+   * Scopes obtenidos desde el claim "scp"
+   * del access token de RutaExpress.
+   */
+  userScopes: string[] = [];
+
   private msalService =
     inject(MsalService);
 
@@ -78,7 +84,7 @@ export class AppComponent implements OnInit {
               result.account.username;
 
             /*
-             * Antes de cargar roles,
+             * Antes de cargar roles y scopes,
              * ocultamos temporalmente
              * las opciones dependientes de rol.
              */
@@ -131,7 +137,7 @@ export class AppComponent implements OnInit {
 
           /*
            * Si existe sesión,
-           * obtenemos los roles.
+           * obtenemos roles y scopes.
            */
           if (account) {
 
@@ -147,6 +153,7 @@ export class AppComponent implements OnInit {
              * No hay sesión.
              */
             this.userRoles = [];
+            this.userScopes = [];
             this.rolesCargados = false;
           }
 
@@ -178,6 +185,7 @@ export class AppComponent implements OnInit {
           this.isLoggedIn = false;
           this.rolesCargados = false;
           this.userRoles = [];
+          this.userScopes = [];
 
         }
 
@@ -188,7 +196,7 @@ export class AppComponent implements OnInit {
 
   /*
    * ==================================================
-   * CARGAR ROLES DESDE ACCESS TOKEN
+   * CARGAR ROLES Y SCOPES DESDE ACCESS TOKEN
    * ==================================================
    */
 
@@ -218,15 +226,47 @@ export class AppComponent implements OnInit {
               result.accessToken
             );
 
+          /*
+           * Roles asignados en Microsoft Entra.
+           */
           this.userRoles =
-            claims?.roles ?? [];
+            Array.isArray(claims?.roles)
+              ? claims.roles
+              : [];
+
+
+          /*
+           * Los scopes delegados normalmente
+           * vienen en el claim "scp" como
+           * una cadena separada por espacios.
+           *
+           * Ejemplo:
+           * "access_as_user otro_scope"
+           */
+          const scopeClaim =
+            claims?.scp;
+
+          this.userScopes =
+            typeof scopeClaim === 'string'
+              ? scopeClaim
+                  .split(' ')
+                  .filter(Boolean)
+              : [];
+
 
           this.rolesCargados = true;
+
 
           console.log(
             'Roles Navbar:',
             this.userRoles
           );
+
+          console.log(
+            'Scopes Navbar:',
+            this.userScopes
+          );
+
 
           /*
            * Fuerza a Angular a actualizar
@@ -239,11 +279,12 @@ export class AppComponent implements OnInit {
         error: (error) => {
 
           console.error(
-            'Error obteniendo roles del Navbar:',
+            'Error obteniendo roles y scopes del Navbar:',
             error
           );
 
           this.userRoles = [];
+          this.userScopes = [];
 
           this.rolesCargados = true;
 
@@ -386,6 +427,7 @@ export class AppComponent implements OnInit {
         .getActiveAccount();
 
     this.userRoles = [];
+    this.userScopes = [];
     this.rolesCargados = false;
     this.isLoggedIn = false;
 
