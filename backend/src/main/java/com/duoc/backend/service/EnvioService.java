@@ -941,7 +941,11 @@ public class EnvioService {
 
             EstadoEnvio nuevoEstado) {
 
-
+        if (nuevoEstado == null) {
+        throw new IllegalArgumentException(
+                "El nuevo estado es obligatorio."
+        );
+        }
 
         Envio envio =
 
@@ -1014,7 +1018,10 @@ public class EnvioService {
             );
 
         }
-
+        // Evitar procesar el mismo estado dos veces
+        if (estadoAnterior == nuevoEstado) {
+        return envio;
+        }
 
 
 
@@ -1150,24 +1157,28 @@ public class EnvioService {
 
 
 
+        // =========================================
+        // PUBLICAR COMANDO WAREHOUSE
+        // =========================================
 
-        /*
+        if (nuevoEstado == EstadoEnvio.ACEPTADO
+                && estadoAnterior != EstadoEnvio.ACEPTADO) {
 
-         * RabbitMQ continúa temporalmente
-
-         * desactivado como estaba.
-
-         */
-
+            notificationPublisher.publicarComandoBodega(
+                    envioActualizado
+            );
+        }
 
 
-        // notificationPublisher
 
-        //     .enviarNotificacionCambioEstado(
+        // =========================================
+        // PUBLICAR NOTIFICACION EN RABBITMQ
+        // =========================================
 
-        //         envioActualizado
+        notificationPublisher.enviarNotificacionCambioEstado(
+                envioActualizado
+        );
 
-        //     );
 
 
 

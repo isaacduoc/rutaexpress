@@ -1,7 +1,11 @@
-#!/bin/bash
-set -e
 
-# Cargar credenciales desde el .env de RabbitMQ
+#!/bin/bash
+set -euo pipefail
+
+# ==========================================
+# CARGAR CREDENCIALES
+# ==========================================
+
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 source "$SCRIPT_DIR/.env"
 
@@ -9,109 +13,148 @@ API="http://localhost:15672/api"
 AUTH="${RABBITMQ_USER}:${RABBITMQ_PASSWORD}"
 VHOST="%2F"
 
+echo "======================================"
+echo " CONFIGURANDO RABBITMQ RUTAEXPRESS"
+echo "======================================"
+
+# ==========================================
+# CREAR EXCHANGES
+# ==========================================
+
 echo "=== Creando exchanges ==="
 
-curl -s -u "$AUTH" \
+curl -fSs -u "$AUTH" \
   -H "content-type: application/json" \
   -X PUT "$API/exchanges/$VHOST/cmd.direct" \
   -d '{"type":"direct","durable":true,"auto_delete":false,"internal":false,"arguments":{}}'
 
-curl -s -u "$AUTH" \
+curl -fSs -u "$AUTH" \
   -H "content-type: application/json" \
   -X PUT "$API/exchanges/$VHOST/cmd.topic" \
   -d '{"type":"topic","durable":true,"auto_delete":false,"internal":false,"arguments":{}}'
 
-curl -s -u "$AUTH" \
+curl -fSs -u "$AUTH" \
   -H "content-type: application/json" \
   -X PUT "$API/exchanges/$VHOST/cmd.dead.dlx" \
   -d '{"type":"direct","durable":true,"auto_delete":false,"internal":false,"arguments":{}}'
 
+# ==========================================
+# CREAR DEAD LETTER QUEUES
+# ==========================================
+
 echo "=== Creando DLQ ==="
 
-curl -s -u "$AUTH" \
+curl -fSs -u "$AUTH" \
   -H "content-type: application/json" \
   -X PUT "$API/queues/$VHOST/q.cmd.email.dlq" \
   -d '{"durable":true,"auto_delete":false,"arguments":{}}'
 
-curl -s -u "$AUTH" \
+curl -fSs -u "$AUTH" \
   -H "content-type: application/json" \
   -X PUT "$API/queues/$VHOST/q.cmd.warehouse.dlq" \
   -d '{"durable":true,"auto_delete":false,"arguments":{}}'
 
-curl -s -u "$AUTH" \
+curl -fSs -u "$AUTH" \
   -H "content-type: application/json" \
   -X PUT "$API/queues/$VHOST/q.cmd.label.dlq" \
   -d '{"durable":true,"auto_delete":false,"arguments":{}}'
 
+# ==========================================
+# CREAR COLAS PRINCIPALES
+# ==========================================
+
 echo "=== Creando colas principales ==="
 
-curl -s -u "$AUTH" \
+curl -fSs -u "$AUTH" \
   -H "content-type: application/json" \
   -X PUT "$API/queues/$VHOST/q.cmd.email" \
-  -d '{"durable":true,"auto_delete":false,"arguments":{"x-dead-letter-exchange":"cmd.dead.dlx","x-dead-letter-routing-key":"email.dlq"}}'
+  -d '{"durable":true,"auto_delete":false,"arguments":{"x-dead-letter-exchange":"cmd.dead.dlx","x-dead-letter-routing-key":"email.dlq","x-message-ttl":86400000,"x-max-length":1000}}'
 
-curl -s -u "$AUTH" \
+curl -fSs -u "$AUTH" \
   -H "content-type: application/json" \
   -X PUT "$API/queues/$VHOST/q.cmd.warehouse" \
-  -d '{"durable":true,"auto_delete":false,"arguments":{"x-dead-letter-exchange":"cmd.dead.dlx","x-dead-letter-routing-key":"warehouse.dlq"}}'
+  -d '{"durable":true,"auto_delete":false,"arguments":{"x-dead-letter-exchange":"cmd.dead.dlx","x-dead-letter-routing-key":"warehouse.dlq","x-message-ttl":86400000,"x-max-length":1000}}'
 
-curl -s -u "$AUTH" \
+curl -fSs -u "$AUTH" \
   -H "content-type: application/json" \
   -X PUT "$API/queues/$VHOST/q.cmd.label" \
-  -d '{"durable":true,"auto_delete":false,"arguments":{"x-dead-letter-exchange":"cmd.dead.dlx","x-dead-letter-routing-key":"label.dlq"}}'
+  -d '{"durable":true,"auto_delete":false,"arguments":{"x-dead-letter-exchange":"cmd.dead.dlx","x-dead-letter-routing-key":"label.dlq","x-message-ttl":86400000,"x-max-length":1000}}'
 
-echo "=== Bindings DLQ ==="
+# ==========================================
+# BINDINGS DLQ
+# ==========================================
 
-curl -s -u "$AUTH" \
+echo "=== Creando bindings DLQ ==="
+
+curl -fSs -u "$AUTH" \
   -H "content-type: application/json" \
   -X POST "$API/bindings/$VHOST/e/cmd.dead.dlx/q/q.cmd.email.dlq" \
   -d '{"routing_key":"email.dlq","arguments":{}}'
 
-curl -s -u "$AUTH" \
+curl -fSs -u "$AUTH" \
   -H "content-type: application/json" \
   -X POST "$API/bindings/$VHOST/e/cmd.dead.dlx/q/q.cmd.warehouse.dlq" \
   -d '{"routing_key":"warehouse.dlq","arguments":{}}'
 
-curl -s -u "$AUTH" \
+curl -fSs -u "$AUTH" \
   -H "content-type: application/json" \
   -X POST "$API/bindings/$VHOST/e/cmd.dead.dlx/q/q.cmd.label.dlq" \
   -d '{"routing_key":"label.dlq","arguments":{}}'
 
-echo "=== Bindings direct ==="
+# ==========================================
+# BINDINGS DIRECT
+# ==========================================
 
-curl -s -u "$AUTH" \
+echo "=== Creando bindings direct ==="
+
+curl -fSs -u "$AUTH" \
   -H "content-type: application/json" \
   -X POST "$API/bindings/$VHOST/e/cmd.direct/q/q.cmd.email" \
   -d '{"routing_key":"email.send","arguments":{}}'
 
-curl -s -u "$AUTH" \
+curl -fSs -u "$AUTH" \
   -H "content-type: application/json" \
   -X POST "$API/bindings/$VHOST/e/cmd.direct/q/q.cmd.warehouse" \
   -d '{"routing_key":"warehouse.ticket","arguments":{}}'
 
-curl -s -u "$AUTH" \
+curl -fSs -u "$AUTH" \
   -H "content-type: application/json" \
   -X POST "$API/bindings/$VHOST/e/cmd.direct/q/q.cmd.label" \
   -d '{"routing_key":"label.gen","arguments":{}}'
 
-echo "=== Bindings topic ==="
+# ==========================================
+# BINDINGS TOPIC
+# ==========================================
 
-curl -s -u "$AUTH" \
+echo "=== Creando bindings topic ==="
+
+curl -fSs -u "$AUTH" \
   -H "content-type: application/json" \
   -X POST "$API/bindings/$VHOST/e/cmd.topic/q/q.cmd.email" \
   -d '{"routing_key":"email.*","arguments":{}}'
 
-curl -s -u "$AUTH" \
+curl -fSs -u "$AUTH" \
   -H "content-type: application/json" \
   -X POST "$API/bindings/$VHOST/e/cmd.topic/q/q.cmd.warehouse" \
   -d '{"routing_key":"warehouse.#","arguments":{}}'
 
-curl -s -u "$AUTH" \
+curl -fSs -u "$AUTH" \
   -H "content-type: application/json" \
   -X POST "$API/bindings/$VHOST/e/cmd.topic/q/q.cmd.label" \
   -d '{"routing_key":"label.*","arguments":{}}'
 
-echo
+# ==========================================
+# FINALIZACION
+# ==========================================
+
+echo ""
 echo "======================================"
-echo " Topologia RabbitMQ creada correctamente"
+echo " TOPOLOGIA RABBITMQ CREADA CORRECTAMENTE"
+echo "======================================"
+echo " Exchanges: 3"
+echo " Colas principales: 3"
+echo " Dead Letter Queues: 3"
+echo " Bindings: 9"
+echo " TTL: 24 horas"
+echo " Limite: 1000 mensajes por cola"
 echo "======================================"

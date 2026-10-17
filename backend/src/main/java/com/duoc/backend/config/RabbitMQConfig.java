@@ -1,3 +1,4 @@
+
 package com.duoc.backend.config;
 
 import org.springframework.amqp.core.*;
@@ -8,30 +9,64 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RabbitMQConfig {
 
-    // Exchanges oficiales de RutaExpress
+    // =========================
+    // EXCHANGES
+    // =========================
+
     public static final String EXCHANGE_DIRECT = "cmd.direct";
     public static final String EXCHANGE_TOPIC = "cmd.topic";
     public static final String EXCHANGE_DLX = "cmd.dead.dlx";
 
-    // Colas principales
+    // =========================
+    // POLITICAS DE RETENCION
+    // =========================
+
+    public static final int MESSAGE_TTL = 86400000;
+    public static final int MAX_QUEUE_LENGTH = 1000;
+
+    // =========================
+    // COLAS PRINCIPALES
+    // =========================
+
     public static final String QUEUE_EMAIL = "q.cmd.email";
     public static final String QUEUE_WAREHOUSE = "q.cmd.warehouse";
     public static final String QUEUE_LABEL = "q.cmd.label";
 
-    // Dead Letter Queues
+    // =========================
+    // DEAD LETTER QUEUES
+    // =========================
+
     public static final String QUEUE_EMAIL_DLQ = "q.cmd.email.dlq";
     public static final String QUEUE_WAREHOUSE_DLQ = "q.cmd.warehouse.dlq";
     public static final String QUEUE_LABEL_DLQ = "q.cmd.label.dlq";
 
-    // Routing keys del exchange directo
+    // =========================
+    // ROUTING KEYS DIRECT
+    // =========================
+
     public static final String ROUTING_KEY_EMAIL = "email.send";
     public static final String ROUTING_KEY_WAREHOUSE = "warehouse.ticket";
     public static final String ROUTING_KEY_LABEL = "label.gen";
 
-    // Routing keys DLQ
+    // =========================
+    // ROUTING KEYS TOPIC
+    // =========================
+
+    public static final String ROUTING_KEY_EMAIL_TOPIC = "email.*";
+    public static final String ROUTING_KEY_WAREHOUSE_TOPIC = "warehouse.#";
+    public static final String ROUTING_KEY_LABEL_TOPIC = "label.*";
+
+    // =========================
+    // ROUTING KEYS DLQ
+    // =========================
+
     public static final String ROUTING_KEY_EMAIL_DLQ = "email.dlq";
     public static final String ROUTING_KEY_WAREHOUSE_DLQ = "warehouse.dlq";
     public static final String ROUTING_KEY_LABEL_DLQ = "label.dlq";
+
+    // =========================
+    // CREACION DE EXCHANGES
+    // =========================
 
     @Bean
     public DirectExchange directExchange() {
@@ -57,6 +92,8 @@ public class RabbitMQConfig {
         return QueueBuilder.durable(QUEUE_EMAIL)
                 .withArgument("x-dead-letter-exchange", EXCHANGE_DLX)
                 .withArgument("x-dead-letter-routing-key", ROUTING_KEY_EMAIL_DLQ)
+                .withArgument("x-message-ttl", MESSAGE_TTL)
+                .withArgument("x-max-length", MAX_QUEUE_LENGTH)
                 .build();
     }
 
@@ -65,6 +102,8 @@ public class RabbitMQConfig {
         return QueueBuilder.durable(QUEUE_WAREHOUSE)
                 .withArgument("x-dead-letter-exchange", EXCHANGE_DLX)
                 .withArgument("x-dead-letter-routing-key", ROUTING_KEY_WAREHOUSE_DLQ)
+                .withArgument("x-message-ttl", MESSAGE_TTL)
+                .withArgument("x-max-length", MAX_QUEUE_LENGTH)
                 .build();
     }
 
@@ -73,6 +112,8 @@ public class RabbitMQConfig {
         return QueueBuilder.durable(QUEUE_LABEL)
                 .withArgument("x-dead-letter-exchange", EXCHANGE_DLX)
                 .withArgument("x-dead-letter-routing-key", ROUTING_KEY_LABEL_DLQ)
+                .withArgument("x-message-ttl", MESSAGE_TTL)
+                .withArgument("x-max-length", MAX_QUEUE_LENGTH)
                 .build();
     }
 
@@ -128,21 +169,21 @@ public class RabbitMQConfig {
     public Binding emailTopicBinding() {
         return BindingBuilder.bind(emailQueue())
                 .to(topicExchange())
-                .with("email.*");
+                .with(ROUTING_KEY_EMAIL_TOPIC);
     }
 
     @Bean
     public Binding warehouseTopicBinding() {
         return BindingBuilder.bind(warehouseQueue())
                 .to(topicExchange())
-                .with("warehouse.#");
+                .with(ROUTING_KEY_WAREHOUSE_TOPIC);
     }
 
     @Bean
     public Binding labelTopicBinding() {
         return BindingBuilder.bind(labelQueue())
                 .to(topicExchange())
-                .with("label.*");
+                .with(ROUTING_KEY_LABEL_TOPIC);
     }
 
     // =========================
@@ -169,6 +210,10 @@ public class RabbitMQConfig {
                 .to(deadLetterExchange())
                 .with(ROUTING_KEY_LABEL_DLQ);
     }
+
+    // =========================
+    // CONVERSOR JSON
+    // =========================
 
     @Bean
     public Jackson2JsonMessageConverter messageConverter() {
