@@ -237,7 +237,7 @@ public class NotificationListener {
         throw new IllegalArgumentException(
                 "Tipo de mensaje no soportado: " + tipo
         );
-
+    }
 
     // =========================
     // EXCEPCIÓN RECUPERABLE
