@@ -18,13 +18,6 @@ public class RabbitMQConfig {
     public static final String EXCHANGE_DLX = "cmd.dead.dlx";
 
     // =========================
-    // POLITICAS DE RETENCION
-    // =========================
-
-    public static final int MESSAGE_TTL = 86400000;
-    public static final int MAX_QUEUE_LENGTH = 1000;
-
-    // =========================
     // COLAS PRINCIPALES
     // =========================
 
@@ -86,14 +79,14 @@ public class RabbitMQConfig {
     // =========================
     // COLAS PRINCIPALES
     // =========================
+    // TTL y max-length se administran mediante
+    // la politica rutaexpress-ttl-max de RabbitMQ.
 
     @Bean
     public Queue emailQueue() {
         return QueueBuilder.durable(QUEUE_EMAIL)
                 .withArgument("x-dead-letter-exchange", EXCHANGE_DLX)
                 .withArgument("x-dead-letter-routing-key", ROUTING_KEY_EMAIL_DLQ)
-                .withArgument("x-message-ttl", MESSAGE_TTL)
-                .withArgument("x-max-length", MAX_QUEUE_LENGTH)
                 .build();
     }
 
@@ -102,8 +95,6 @@ public class RabbitMQConfig {
         return QueueBuilder.durable(QUEUE_WAREHOUSE)
                 .withArgument("x-dead-letter-exchange", EXCHANGE_DLX)
                 .withArgument("x-dead-letter-routing-key", ROUTING_KEY_WAREHOUSE_DLQ)
-                .withArgument("x-message-ttl", MESSAGE_TTL)
-                .withArgument("x-max-length", MAX_QUEUE_LENGTH)
                 .build();
     }
 
@@ -112,8 +103,6 @@ public class RabbitMQConfig {
         return QueueBuilder.durable(QUEUE_LABEL)
                 .withArgument("x-dead-letter-exchange", EXCHANGE_DLX)
                 .withArgument("x-dead-letter-routing-key", ROUTING_KEY_LABEL_DLQ)
-                .withArgument("x-message-ttl", MESSAGE_TTL)
-                .withArgument("x-max-length", MAX_QUEUE_LENGTH)
                 .build();
     }
 

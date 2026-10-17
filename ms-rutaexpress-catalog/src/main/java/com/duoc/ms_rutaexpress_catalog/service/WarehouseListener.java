@@ -50,7 +50,7 @@ public class WarehouseListener {
     // CONSUMIDOR DE WAREHOUSE
     // ====================================
 
-    @RabbitListener(queues = "q.cmd.warehouse")
+    @RabbitListener(queues = "${rutaexpress.rabbitmq.queue.warehouse}")
     public void consumirWarehouse(
             Message message,
             Channel channel

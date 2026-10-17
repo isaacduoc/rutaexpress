@@ -1,6 +1,7 @@
+
 package com.duoc.ms_rutaexpress_rabbit_admin.controller;
 
-import com.duoc.ms_rutaexpress_rabbit_admin.service.ColaAdminService;
+import com.duoc.ms_rutaexpress_rabbit_admin.service.RabbitAdminService;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -16,9 +17,9 @@ import java.util.Map;
 @RequestMapping("/api/admin/colas")
 public class ColaAdminController {
 
-    private final ColaAdminService servicio;
+    private final RabbitAdminService servicio;
 
-    public ColaAdminController(ColaAdminService servicio) {
+    public ColaAdminController(RabbitAdminService servicio) {
         this.servicio = servicio;
     }
 
@@ -40,7 +41,7 @@ public class ColaAdminController {
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(servicio.crear(request.nombre()));
+                .body(servicio.crearCola(request.nombre()));
     }
 
     @GetMapping("/{nombre}")
@@ -48,7 +49,7 @@ public class ColaAdminController {
             @PathVariable String nombre) {
 
         return ResponseEntity.ok(
-                servicio.consultar(nombre)
+                servicio.consultarCola(nombre)
         );
     }
 
@@ -56,7 +57,7 @@ public class ColaAdminController {
     public ResponseEntity<Void> eliminar(
             @PathVariable String nombre) {
 
-        servicio.eliminar(nombre);
+        servicio.eliminarCola(nombre);
 
         return ResponseEntity.noContent().build();
     }

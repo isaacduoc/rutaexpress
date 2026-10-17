@@ -1,6 +1,7 @@
+
 package com.duoc.ms_rutaexpress_rabbit_admin.controller;
 
-import com.duoc.ms_rutaexpress_rabbit_admin.service.ExchangeAdminService;
+import com.duoc.ms_rutaexpress_rabbit_admin.service.RabbitAdminService;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -16,10 +17,9 @@ import java.util.Map;
 @RequestMapping("/api/admin/exchanges")
 public class ExchangeAdminController {
 
-    private final ExchangeAdminService servicio;
+    private final RabbitAdminService servicio;
 
-    public ExchangeAdminController(
-            ExchangeAdminService servicio) {
+    public ExchangeAdminController(RabbitAdminService servicio) {
         this.servicio = servicio;
     }
 
@@ -47,7 +47,7 @@ public class ExchangeAdminController {
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(servicio.crear(
+                .body(servicio.crearExchange(
                         request.nombre(),
                         request.tipo()
                 ));
@@ -57,7 +57,7 @@ public class ExchangeAdminController {
     public ResponseEntity<Void> eliminar(
             @PathVariable String nombre) {
 
-        servicio.eliminar(nombre);
+        servicio.eliminarExchange(nombre);
 
         return ResponseEntity.noContent().build();
     }

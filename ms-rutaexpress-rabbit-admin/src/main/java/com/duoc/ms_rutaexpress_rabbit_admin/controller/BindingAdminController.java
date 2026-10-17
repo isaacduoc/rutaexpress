@@ -1,6 +1,7 @@
+
 package com.duoc.ms_rutaexpress_rabbit_admin.controller;
 
-import com.duoc.ms_rutaexpress_rabbit_admin.service.BindingAdminService;
+import com.duoc.ms_rutaexpress_rabbit_admin.service.RabbitAdminService;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -16,31 +17,32 @@ import java.util.Map;
 @RequestMapping("/api/admin/bindings")
 public class BindingAdminController {
 
-    private final BindingAdminService servicio;
+    private final RabbitAdminService servicio;
 
-    public BindingAdminController(
-            BindingAdminService servicio) {
-
+    public BindingAdminController(RabbitAdminService servicio) {
         this.servicio = servicio;
     }
 
     public record BindingRequest(
 
-            @NotBlank
+            @NotBlank(message = "El nombre de la cola es obligatorio")
             @Pattern(
-                    regexp = "^ep2\\.admin\\.[a-z0-9._-]{1,50}$"
+                    regexp = "^ep2\\.admin\\.[a-z0-9._-]{1,50}$",
+                    message = "La cola debe comenzar con ep2.admin."
             )
             String cola,
 
-            @NotBlank
+            @NotBlank(message = "El nombre del exchange es obligatorio")
             @Pattern(
-                    regexp = "^ep2\\.admin\\.[a-z0-9._-]{1,50}$"
+                    regexp = "^ep2\\.admin\\.[a-z0-9._-]{1,50}$",
+                    message = "El exchange debe comenzar con ep2.admin."
             )
             String exchange,
 
-            @NotBlank
+            @NotBlank(message = "La routing key es obligatoria")
             @Pattern(
-                    regexp = "^ep2\\.[a-z0-9._*#-]{1,60}$"
+                    regexp = "^ep2\\.[a-z0-9._*#-]{1,60}$",
+                    message = "La routing key debe comenzar con ep2."
             )
             String routingKey
 
@@ -52,7 +54,7 @@ public class BindingAdminController {
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(servicio.crear(
+                .body(servicio.crearBinding(
                         request.cola(),
                         request.exchange(),
                         request.routingKey()
@@ -63,7 +65,7 @@ public class BindingAdminController {
     public ResponseEntity<Void> eliminar(
             @Valid @RequestBody BindingRequest request) {
 
-        servicio.eliminar(
+        servicio.eliminarBinding(
                 request.cola(),
                 request.exchange(),
                 request.routingKey()

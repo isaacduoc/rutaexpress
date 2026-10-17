@@ -68,17 +68,28 @@ echo "=== Creando colas principales ==="
 curl -fSs -u "$AUTH" \
   -H "content-type: application/json" \
   -X PUT "$API/queues/$VHOST/q.cmd.email" \
-  -d '{"durable":true,"auto_delete":false,"arguments":{"x-dead-letter-exchange":"cmd.dead.dlx","x-dead-letter-routing-key":"email.dlq","x-message-ttl":86400000,"x-max-length":1000}}'
+  -d '{"durable":true,"auto_delete":false,"arguments":{"x-dead-letter-exchange":"cmd.dead.dlx","x-dead-letter-routing-key":"email.dlq"}}'
 
 curl -fSs -u "$AUTH" \
   -H "content-type: application/json" \
   -X PUT "$API/queues/$VHOST/q.cmd.warehouse" \
-  -d '{"durable":true,"auto_delete":false,"arguments":{"x-dead-letter-exchange":"cmd.dead.dlx","x-dead-letter-routing-key":"warehouse.dlq","x-message-ttl":86400000,"x-max-length":1000}}'
+  -d '{"durable":true,"auto_delete":false,"arguments":{"x-dead-letter-exchange":"cmd.dead.dlx","x-dead-letter-routing-key":"warehouse.dlq"}}'
 
 curl -fSs -u "$AUTH" \
   -H "content-type: application/json" \
   -X PUT "$API/queues/$VHOST/q.cmd.label" \
-  -d '{"durable":true,"auto_delete":false,"arguments":{"x-dead-letter-exchange":"cmd.dead.dlx","x-dead-letter-routing-key":"label.dlq","x-message-ttl":86400000,"x-max-length":1000}}'
+  -d '{"durable":true,"auto_delete":false,"arguments":{"x-dead-letter-exchange":"cmd.dead.dlx","x-dead-letter-routing-key":"label.dlq"}}'
+
+# ==========================================
+# POLITICA TTL Y LIMITE DE MENSAJES
+# ==========================================
+
+echo "=== Configurando politica TTL y limite ==="
+
+curl -fSs -u "$AUTH" \
+  -H "content-type: application/json" \
+  -X PUT "$API/policies/$VHOST/rutaexpress-ttl-max" \
+  -d '{"pattern":"^q[.]cmd[.](email|warehouse|label)$","definition":{"message-ttl":86400000,"max-length":1000},"priority":0,"apply-to":"queues"}'
 
 # ==========================================
 # BINDINGS DLQ
