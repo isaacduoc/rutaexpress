@@ -49,6 +49,8 @@ public class NotificationPublisher {
         datos.put("id", envio.getId());
         datos.put("estado", envio.getEstado());
         datos.put("destinatario", envio.getNombreDestinatario());
+        datos.put("correoDestinatario", envio.getCorreoDestinatario());
+        datos.put("codigoSeguimiento", envio.getCodigoSeguimiento());
 
         // Convertir los datos a JSON
         String mensaje;
@@ -120,6 +122,51 @@ public class NotificationPublisher {
             + envio.getId()
         );
     }
+
+
+    // =========================
+    // PUBLICAR COMANDO LABEL
+    // =========================
+
+    public void publicarComandoEtiqueta(Envio envio) {
+
+        if (envio == null || envio.getId() == null) {
+            throw new IllegalArgumentException(
+                "El envio debe estar guardado antes de generar etiqueta"
+            );
+        }
+
+        Map<String, Object> datos = new LinkedHashMap<>();
+
+        datos.put("envioId", envio.getId());
+        datos.put("codigoSeguimiento", envio.getCodigoSeguimiento());
+        datos.put("destinatario", envio.getNombreDestinatario());
+        datos.put("direccionDestino", envio.getDireccionDestino());
+        datos.put("servicio", envio.getServicio());
+        datos.put("tipoPaquete", envio.getTipoPaquete());
+        datos.put("peso", envio.getPeso());
+
+        String mensaje;
+
+        try {
+            mensaje = objectMapper.writeValueAsString(datos);
+        } catch (JsonProcessingException e) {
+            throw new IllegalStateException(
+                "Error al generar comando Label", e
+            );
+        }
+
+        publicarMensaje(
+            RabbitMQConfig.ROUTING_KEY_LABEL,
+            mensaje
+        );
+
+        System.out.println(
+            ">>> [BACKEND] Comando Label solicitado para envio ID: "
+            + envio.getId()
+        );
+    }
+
 
     // =========================
     // METODO PARA PUBLICAR

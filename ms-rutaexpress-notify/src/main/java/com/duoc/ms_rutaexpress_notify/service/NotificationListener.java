@@ -1,4 +1,3 @@
-
 package com.duoc.ms_rutaexpress_notify.service;
 
 import com.duoc.ms_rutaexpress_notify.config.RabbitMQConfig;
@@ -13,6 +12,7 @@ import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 
 @Service
 public class NotificationListener {
@@ -22,6 +22,17 @@ public class NotificationListener {
 
     private static final int MAX_INTENTOS = 3;
     private static final long ESPERA_MS = 500;
+
+    private final EtiquetaService etiquetaService;
+    private final EmailService emailService;
+
+    public NotificationListener(
+            EtiquetaService etiquetaService,
+            EmailService emailService) {
+
+        this.etiquetaService = etiquetaService;
+        this.emailService = emailService;
+    }
 
     @Value("${rutaexpress.rabbit.pruebas.simular-error-transitorio:false}")
     private boolean simularErrorTransitorio;
@@ -145,6 +156,8 @@ public class NotificationListener {
         }
     }
 
+
+
     // =========================
     // PROCESAMIENTO DEL MENSAJE
     // =========================
@@ -154,7 +167,7 @@ public class NotificationListener {
             String mensaje
     ) {
 
-        // Simulación activable solo para pruebas locales
+        // Simular errores temporales en pruebas
         if (simularErrorTransitorio
                 && mensaje.trim().equals("PRUEBA_REINTENTO")) {
 
@@ -163,13 +176,68 @@ public class NotificationListener {
             );
         }
 
-        // Procesamiento inicial.
-        // Aquí integraremos después la lógica real.
-        log.info(
-                "[{}] Mensaje recibido: {}",
-                tipo, mensaje
+        // =========================
+        // GENERAR ETIQUETA REAL
+        // =========================
+
+        if ("LABEL".equals(tipo)) {
+
+            try {
+
+                var archivo = etiquetaService.generarEtiqueta(
+                        mensaje
+                );
+
+                log.info(
+                        "[LABEL] Etiqueta generada correctamente: {}",
+                        archivo
+                );
+
+            } catch (UncheckedIOException e) {
+
+                throw new ErrorTransitorioException(
+                        "Error temporal al guardar etiqueta: "
+                        + e.getMessage()
+                );
+            }
+
+            return;
+        }
+
+        // EMAIL: pendiente integrar procesamiento real
+        // =========================
+        // PREPARAR EMAIL
+        // =========================
+
+        if ("EMAIL".equals(tipo)) {
+
+            try {
+
+                var archivo = emailService.prepararEmail(
+                        mensaje
+                );
+
+                log.info(
+                        "[EMAIL] Correo preparado correctamente: {}",
+                        archivo
+                );
+
+            } catch (UncheckedIOException e) {
+
+                throw new ErrorTransitorioException(
+                        "Error temporal al guardar correo: "
+                        + e.getMessage()
+                );
+            }
+
+            return;
+        }
+
+        // Rechazar tipos de mensajes desconocidos
+        throw new IllegalArgumentException(
+                "Tipo de mensaje no soportado: " + tipo
         );
-    }
+
 
     // =========================
     // EXCEPCIÓN RECUPERABLE

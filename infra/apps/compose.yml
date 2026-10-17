@@ -78,6 +78,9 @@ services:
       RABBITMQ_USERNAME: ${RABBITMQ_USERNAME}
       RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
       SPRING_RABBITMQ_DYNAMIC: "false"
+    volumes:
+      - rutaexpress-emails:/app/emails
+      - rutaexpress-etiquetas:/app/etiquetas
     networks:
       - rutaexpress-net
 
@@ -104,3 +107,7 @@ services:
 networks:
   rutaexpress-net:
     external: true
+
+volumes:
+  rutaexpress-emails:
+  rutaexpress-etiquetas:

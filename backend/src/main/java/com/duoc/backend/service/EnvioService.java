@@ -1157,17 +1157,25 @@ public class EnvioService {
 
 
 
+
         // =========================================
-        // PUBLICAR COMANDO WAREHOUSE
+        // PUBLICAR COMANDOS WAREHOUSE Y LABEL
         // =========================================
 
         if (nuevoEstado == EstadoEnvio.ACEPTADO
                 && estadoAnterior != EstadoEnvio.ACEPTADO) {
 
+            // Preparar el paquete en bodega
             notificationPublisher.publicarComandoBodega(
                     envioActualizado
             );
+
+            // Solicitar la generacion de etiqueta
+            notificationPublisher.publicarComandoEtiqueta(
+                    envioActualizado
+            );
         }
+
 
 
 
