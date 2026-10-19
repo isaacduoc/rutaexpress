@@ -94,6 +94,10 @@ services:
       CATALOG_SERVICE_URL: http://catalog:8083/api/catalog
       REPORT_SERVICE_URL: http://report:8085/api/report
       AUDIT_SERVICE_URL: http://audit:8084/api/audit
+      RABBIT_ADMIN_SERVICE_URL: http://rabbit-admin:8086/api/admin
+      RABBIT_ADMIN_USER: ${RABBIT_ADMIN_USER}
+      RABBIT_ADMIN_PASSWORD: ${RABBIT_ADMIN_PASSWORD}
+
     depends_on:
       - shipments
       - catalog

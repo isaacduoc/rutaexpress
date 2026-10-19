@@ -29,192 +29,170 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         http
-            .csrf(csrf -> csrf.disable())
+                .csrf(csrf -> csrf.disable())
 
-            .cors(cors ->
-                cors.configurationSource(
-                    corsConfigurationSource()
-                )
-            )
+                .cors(cors -> cors.configurationSource(
+                        corsConfigurationSource()))
 
-            .authorizeHttpRequests(auth -> auth
+                .authorizeHttpRequests(auth -> auth
 
-                // =========================
-                // CORS
-                // =========================
-                .requestMatchers(
-                    HttpMethod.OPTIONS,
-                    "/**"
-                )
-                .permitAll()
+                        // =========================
+                        // CORS
+                        // =========================
+                        .requestMatchers(
+                                HttpMethod.OPTIONS,
+                                "/**")
+                        .permitAll()
 
-                // =========================
-                // REPORTERIA
-                // Solo Admin
-                // =========================
-                .requestMatchers(
-                    "/bff/v1/report/**"
-                )
-                .hasRole("Admin")
+                        // =========================
+                        // ADMINISTRACION RABBITMQ
+                        // Solo Admin
+                        // =========================
+                        .requestMatchers(
+                                "/bff/v1/admin/**")
+                        .hasRole("Admin")
 
-                // =========================
-                // AUDITORIA
-                // Admin o Auditor
-                // =========================
-                .requestMatchers(
-                    "/bff/v1/audit/**"
-                )
-                .hasAnyRole(
-                    "Admin",
-                    "Auditor"
-                )
+                        // =========================
+                        // REPORTERIA
+                        // Solo Admin
+                        // =========================
+                        .requestMatchers(
+                                "/bff/v1/report/**")
+                        .hasRole("Admin")
 
-                // =========================
-                // CATALOGO
-                // =========================
+                        // =========================
+                        // AUDITORIA
+                        // Admin o Auditor
+                        // =========================
+                        .requestMatchers(
+                                "/bff/v1/audit/**")
+                        .hasAnyRole(
+                                "Admin",
+                                "Auditor")
 
-                /*
-                 * Cliente puede consultar
-                 * servicios disponibles
-                 * para crear un envío.
-                 */
-                .requestMatchers(
-                    HttpMethod.GET,
-                    "/bff/v1/catalog/services"
-                )
-                .hasAnyRole(
-                    "Admin",
-                    "Despachador",
-                    "Cliente"
-                )
+                        // =========================
+                        // CATALOGO
+                        // =========================
 
-                /*
-                 * Otras consultas del catálogo:
-                 * Admin o Despachador
-                 */
-                .requestMatchers(
-                    HttpMethod.GET,
-                    "/bff/v1/catalog/**"
-                )
-                .hasAnyRole(
-                    "Admin",
-                    "Despachador"
-                )
+                        /*
+                         * Cliente puede consultar
+                         * servicios disponibles
+                         * para crear un envío.
+                         */
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/bff/v1/catalog/services")
+                        .hasAnyRole(
+                                "Admin",
+                                "Despachador",
+                                "Cliente")
 
-                /*
-                 * Crear servicios:
-                 * solo Admin
-                 */
-                .requestMatchers(
-                    HttpMethod.POST,
-                    "/bff/v1/catalog/**"
-                )
-                .hasRole("Admin")
+                        /*
+                         * Otras consultas del catálogo:
+                         * Admin o Despachador
+                         */
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/bff/v1/catalog/**")
+                        .hasAnyRole(
+                                "Admin",
+                                "Despachador")
 
-                /*
-                 * Modificar tarifa/capacidad:
-                 * solo Admin
-                 */
-                .requestMatchers(
-                    HttpMethod.PUT,
-                    "/bff/v1/catalog/**"
-                )
-                .hasRole("Admin")
+                        /*
+                         * Crear servicios:
+                         * solo Admin
+                         */
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/bff/v1/catalog/**")
+                        .hasRole("Admin")
 
-                /*
-                 * Eliminar del catálogo:
-                 * solo Admin
-                 */
-                .requestMatchers(
-                    HttpMethod.DELETE,
-                    "/bff/v1/catalog/**"
-                )
-                .hasRole("Admin")
+                        /*
+                         * Modificar tarifa/capacidad:
+                         * solo Admin
+                         */
+                        .requestMatchers(
+                                HttpMethod.PUT,
+                                "/bff/v1/catalog/**")
+                        .hasRole("Admin")
 
-                // =========================
-                // ENVIOS
-                // =========================
+                        /*
+                         * Eliminar del catálogo:
+                         * solo Admin
+                         */
+                        .requestMatchers(
+                                HttpMethod.DELETE,
+                                "/bff/v1/catalog/**")
+                        .hasRole("Admin")
 
-                /*
-                 * Consultar envíos
-                 */
-                .requestMatchers(
-                    HttpMethod.GET,
-                    "/bff/v1/shipments/**"
-                )
-                .hasAnyRole(
-                    "Admin",
-                    "Despachador",
-                    "Cliente"
-                )
+                        // =========================
+                        // ENVIOS
+                        // =========================
 
-                /*
-                 * Crear envío
-                 */
-                .requestMatchers(
-                    HttpMethod.POST,
-                    "/bff/v1/shipments/**"
-                )
-                .hasAnyRole(
-                    "Admin",
-                    "Despachador",
-                    "Cliente"
-                )
+                        /*
+                         * Consultar envíos
+                         */
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/bff/v1/shipments/**")
+                        .hasAnyRole(
+                                "Admin",
+                                "Despachador",
+                                "Cliente")
 
-                /*
-                 * Cambiar estado
-                 */
-                .requestMatchers(
-                    HttpMethod.PUT,
-                    "/bff/v1/shipments/**"
-                )
-                .hasAnyRole(
-                    "Admin",
-                    "Despachador"
-                )
+                        /*
+                         * Crear envío
+                         */
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/bff/v1/shipments/**")
+                        .hasAnyRole(
+                                "Admin",
+                                "Despachador",
+                                "Cliente")
 
-                /*
-                 * Quitar/archivar un envío
-                 * ya finalizado.
-                 *
-                 * Solo Admin o Despachador.
-                 */
-                .requestMatchers(
-                    HttpMethod.DELETE,
-                    "/bff/v1/shipments/**"
-                )
-                .hasAnyRole(
-                    "Admin",
-                    "Despachador"
-                )
+                        /*
+                         * Cambiar estado
+                         */
+                        .requestMatchers(
+                                HttpMethod.PUT,
+                                "/bff/v1/shipments/**")
+                        .hasAnyRole(
+                                "Admin",
+                                "Despachador")
 
-                /*
-                 * Cualquier otra ruta requiere
-                 * un JWT válido.
-                 */
-                .anyRequest()
-                .authenticated()
-            )
+                        /*
+                         * Quitar/archivar un envío
+                         * ya finalizado.
+                         *
+                         * Solo Admin o Despachador.
+                         */
+                        .requestMatchers(
+                                HttpMethod.DELETE,
+                                "/bff/v1/shipments/**")
+                        .hasAnyRole(
+                                "Admin",
+                                "Despachador")
 
-            .oauth2ResourceServer(oauth ->
-                oauth.jwt(jwt ->
-                    jwt.jwtAuthenticationConverter(
-                        azureJwtAuthenticationConverter()
-                    )
-                )
-            );
+                        /*
+                         * Cualquier otra ruta requiere
+                         * un JWT válido.
+                         */
+                        .anyRequest()
+                        .authenticated())
+
+                .oauth2ResourceServer(oauth -> oauth.jwt(jwt -> jwt.jwtAuthenticationConverter(
+                        azureJwtAuthenticationConverter())));
 
         return http.build();
     }
 
     @Bean
-    public Converter<Jwt, AbstractAuthenticationToken>
-    azureJwtAuthenticationConverter() {
+    public Converter<Jwt, AbstractAuthenticationToken> azureJwtAuthenticationConverter() {
 
         return jwt -> {
 
-            Collection<String> roles =
-                jwt.getClaimAsStringList("roles");
+            Collection<String> roles = jwt.getClaimAsStringList("roles");
 
             List<GrantedAuthority> authorities;
 
@@ -225,69 +203,53 @@ public class SecurityConfig {
             } else {
 
                 authorities = roles.stream()
-                    .map(role ->
-                        new SimpleGrantedAuthority(
-                            "ROLE_" + role
-                        )
-                    )
-                    .collect(Collectors.toList());
+                        .map(role -> new SimpleGrantedAuthority(
+                                "ROLE_" + role))
+                        .collect(Collectors.toList());
             }
 
             return new JwtAuthenticationToken(
-                jwt,
-                authorities
-            );
+                    jwt,
+                    authorities);
         };
     }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
 
-        CorsConfiguration configuration =
-            new CorsConfiguration();
+        CorsConfiguration configuration = new CorsConfiguration();
 
         configuration.setAllowedOrigins(
-            List.of(
-                "http://localhost:4200",
-                "https://rutaexpress-duoc.netlify.app"
-            )
-        );
+                List.of(
+                        "http://localhost:4200",
+                        "https://rutaexpress-duoc.netlify.app"));
 
         configuration.setAllowedMethods(
-            List.of(
-                "GET",
-                "POST",
-                "PUT",
-                "PATCH",
-                "DELETE",
-                "OPTIONS"
-            )
-        );
+                List.of(
+                        "GET",
+                        "POST",
+                        "PUT",
+                        "PATCH",
+                        "DELETE",
+                        "OPTIONS"));
 
         configuration.setAllowedHeaders(
-            List.of(
-                "Authorization",
-                "Content-Type"
-            )
-        );
+                List.of(
+                        "Authorization",
+                        "Content-Type"));
 
         configuration.setExposedHeaders(
-            List.of(
-                "Authorization"
-            )
-        );
+                List.of(
+                        "Authorization"));
 
         configuration.setAllowCredentials(
-            true
-        );
+                true);
 
-        UrlBasedCorsConfigurationSource source =
-            new UrlBasedCorsConfigurationSource();
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 
         source.registerCorsConfiguration(
-            "/**",
-            configuration
-        );
+                "/**",
+                configuration);
 
         return source;
     }
