@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -124,6 +125,23 @@ class MsRutaexpressBffApplicationTests {
 		mockMvc.perform(
 				get("/api/admin/colas/ep2.admin.prueba"))
 				.andExpect(status().isOk());
+	}
+
+	@Test
+	@WithMockUser(roles = "Admin")
+	void adminRecibe400CuandoRabbitAdminRechazaPeticion() throws Exception {
+
+		when(restTemplate.exchange(
+				any(URI.class),
+				eq(HttpMethod.GET),
+				any(HttpEntity.class),
+				eq(String.class))).thenThrow(
+						new org.springframework.web.client.HttpClientErrorException(
+								HttpStatus.BAD_REQUEST));
+
+		mockMvc.perform(
+				get("/api/admin/colas/q.cmd.email"))
+				.andExpect(status().isBadRequest());
 	}
 
 }
