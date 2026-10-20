@@ -100,4 +100,30 @@ class MsRutaexpressBffApplicationTests {
 								.equals("ROLE_Admin")));
 	}
 
+	@Test
+	@WithMockUser(roles = "Cliente")
+	void clienteNoPuedeAccederRutaApiAdmin() throws Exception {
+
+		mockMvc.perform(
+				get("/api/admin/colas/ep2.admin.prueba"))
+				.andExpect(status().isForbidden());
+	}
+
+	@Test
+	@WithMockUser(roles = "Admin")
+	void adminPuedeConsultarRutaApiAdmin() throws Exception {
+
+		when(restTemplate.exchange(
+				any(URI.class),
+				eq(HttpMethod.GET),
+				any(HttpEntity.class),
+				eq(String.class))).thenReturn(
+						ResponseEntity.ok(
+								"{\"nombre\":\"ep2.admin.prueba\"}"));
+
+		mockMvc.perform(
+				get("/api/admin/colas/ep2.admin.prueba"))
+				.andExpect(status().isOk());
+	}
+
 }

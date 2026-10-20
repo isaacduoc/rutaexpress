@@ -11,7 +11,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 @RestController
-@RequestMapping("/bff/v1/admin")
+@RequestMapping({"/bff/v1/admin", "/api/admin"})
 public class RabbitAdminBffController {
 
     private final RestTemplate restTemplate;
