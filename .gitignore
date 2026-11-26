@@ -69,3 +69,15 @@ postgres-data/
 # =========================
 *.bak
 *.backup
+
+# =========================
+# Claves privadas y certificados
+# =========================
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+id_rsa
+id_ed25519

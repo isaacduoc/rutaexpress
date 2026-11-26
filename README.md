@@ -1,369 +1,256 @@
-RutaExpress Backend
+# RutaExpress — Entrega Parcial 2 (EP2)
 
-Backend del proyecto RutaExpress, desarrollado con arquitectura de microservicios para la gestión de envíos, catálogo de servicios, auditoría, reportes y notificaciones.
+Sistema académico de logística y seguimiento de envíos, desarrollado con arquitectura de microservicios, mensajería asíncrona, seguridad JWT y despliegue en AWS.
 
-Este repositorio contiene los distintos microservicios del backend, además de la infraestructura necesaria para ejecutar Oracle, Kafka, Zookeeper y RabbitMQ mediante Docker Compose.
+## 1. Arquitectura
 
-Arquitectura
+El frontend Angular consume las API a través de AWS API Gateway y del Backend for Frontend (BFF).
 
-Servicio
+El backend utiliza microservicios Spring Boot, Oracle Database, RabbitMQ y componentes de mensajería y auditoría.
 
-Puerto
+**Flujo principal:**
 
-Base de datos / función
+```text
+Angular → API Gateway → BFF → Microservicios → RabbitMQ → Consumidores → Oracle
+```
 
-Shipments
+**Aplicación web:** https://rutaexpress-duoc.netlify.app
 
-8080
+## 2. Componentes
 
-Oracle - gestión de envíos
+| Componente | Puerto interno | Función |
+|---|---:|---|
+| Shipments | 8080 | Gestión y seguimiento de envíos |
+| BFF | 8081 | Entrada al backend y seguridad JWT |
+| Notify | 8082 | Procesamiento de EMAIL y LABEL |
+| Catalog | 8083 | Catálogo, capacidad y tickets de bodega |
+| Audit | 8084 | Auditoría de eventos |
+| Report | 8085 | Reportes |
+| Rabbit Admin | 8086 | Administración de RabbitMQ mediante REST |
+| Oracle | 1521 | Persistencia de datos |
+| RabbitMQ | 5672 | Mensajería AMQP |
+| RabbitMQ Management | 15672 | Administración y métricas |
 
-BFF
+## 3. Tecnologías
 
-8081
+- Java 21 y Spring Boot
+- Spring Security y OAuth2 Resource Server
+- Microsoft Entra ID y JWT
+- Angular y TypeScript
+- Oracle Database
+- RabbitMQ
+- Apache Kafka y Zookeeper
+- Docker y Docker Compose
+- Maven
+- AWS EC2, API Gateway y balanceador de carga
+- Netlify para el frontend
 
-Backend for Frontend / seguridad JWT
+## 4. Estructura de repositorios
 
-Notify
+Para la EP2, los componentes principales se separaron en repositorios independientes.
 
-8082
+### Repositorio principal `rutaexpress`
 
-Notificaciones
+Este repositorio conserva los componentes auxiliares y la infraestructura compartida:
 
-Catalog
-
-8083
-
-Oracle - catálogo y capacidad
-
-Audit
-
-8084
-
-Oracle - auditoría de eventos
-
-Report
-
-8085
-
-Oracle - reportes
-
-Oracle
-
-1521
-
-Base de datos
-
-RabbitMQ
-
-5672
-
-Mensajería
-
-RabbitMQ Management
-
-15672
-
-Panel web
-
-Kafka
-
-9092
-
-Eventos
-
-Zookeeper
-
-2181
-
-Coordinación de Kafka
-
-Tecnologías utilizadas
-
-Java 21
-
-Spring Boot
-
-Spring Web
-
-Spring Data JPA
-
-Spring Security
-
-OAuth2 Resource Server / JWT
-
-Microsoft Entra ID / MSAL
-
-Oracle Database
-
-Apache Kafka
-
-Zookeeper
-
-RabbitMQ
-
-Docker / Docker Compose
-
-Maven
-
-Estructura del repositorio
-
-backend-rutaexpress-main/
-│
-├── README.md
-├── backend/                     # ms-rutaexpress-shipments
-├── ms-rutaexpress-bff/
-├── ms-rutaexpress-catalog/
-├── ms-rutaexpress-notify/
+```text
+rutaexpress/
+├── infra/
 ├── ms-rutaexpress-audit/
+├── ms-rutaexpress-notify/
 └── ms-rutaexpress-report/
+```
 
-Bases de datos
+### Repositorios independientes
 
-Los microservicios persistentes utilizan Oracle con esquemas separados:
+- `rutaexpress-frontend` — Frontend Angular + MSAL.
+- `rutaexpress-shipments` — Microservicio principal de envíos.
+- `rutaexpress-bff` — Backend for Frontend.
+- `rutaexpress-catalog` — Microservicio de catálogo.
+- `rutaexpress-rabbit-admin` — Microservicio administrador de RabbitMQ.
 
-Microservicio
+Esta separación permite entregar de forma independiente los componentes principales solicitados para la evaluación, manteniendo en el repositorio general los servicios auxiliares y la infraestructura compartida.
 
-Esquema Oracle
+## 5. RabbitMQ — EP2
 
-Shipments
+RutaExpress utiliza mensajería asíncrona para desacoplar la publicación de comandos y su procesamiento.
 
-RUTAEXPRESS_SHIPMENTS
+### Colas principales
 
-Catalog
+- `q.cmd.email`
+- `q.cmd.label`
+- `q.cmd.warehouse`
 
-RUTAEXPRESS_CATALOG
+### Colas de errores (DLQ)
 
-Audit
+- `q.cmd.email.dlq`
+- `q.cmd.label.dlq`
+- `q.cmd.warehouse.dlq`
 
-RUTAEXPRESS_AUDIT
+Los consumidores procesan los mensajes y confirman su recepción mediante ACK.
 
-Report
+Ante errores, el sistema permite probar reintentos limitados y el envío de mensajes fallidos a las DLQ mediante NACK y configuración de dead lettering.
 
-RUTAEXPRESS_REPORT
+### Exchanges
 
-Tablas principales:
+La topología utiliza exchanges de tipo `direct` y `topic`, además de un exchange de dead letter para enrutar mensajes fallidos hacia sus respectivas DLQ.
 
-ENVIOS
+### Política de colas
 
-SERVICIOS_CAT
+La política `rutaexpress-ttl-max` configura:
 
-AUDIT_EVENTS
+- TTL de mensajes: 86.400.000 ms (24 horas).
+- Capacidad máxima: 1.000 mensajes por cola principal.
+- Desbordamiento: comportamiento `drop-head` por defecto.
 
-El microservicio de notificaciones no utiliza base de datos.
+Las colas principales tienen consumidores dedicados. En las pruebas se verificó ACK y un prefetch de 5 para el consumidor EMAIL.
 
-Flujo principal
+### Administración REST
 
-Creación de envío
+Rabbit Admin permite realizar operaciones de administración sobre colas, exchanges y bindings mediante rutas protegidas.
 
-El cliente crea un envío.
+Ejemplos:
 
-Shipments guarda el envío en Oracle.
+- `POST /api/admin/colas`
+- `GET /api/admin/colas/{nombre}`
+- `DELETE /api/admin/colas/{nombre}`
+- `POST /api/admin/exchanges`
+- `DELETE /api/admin/exchanges/{nombre}`
+- `POST /api/admin/bindings`
+- `DELETE /api/admin/bindings`
 
-Se genera un código de seguimiento.
+Las operaciones administrativas requieren un usuario con rol `Admin`.
 
-Se publica un evento en Kafka.
+## 6. Persistencia en Oracle
 
-Audit registra el evento.
+Los microservicios utilizan esquemas separados según su responsabilidad.
 
-Report procesa los eventos necesarios.
+| Esquema | Responsabilidad |
+|---|---|
+| `RUTAEXPRESS_SHIPMENTS` | Envíos |
+| `RUTAEXPRESS_CATALOG` | Catálogo y tickets de bodega |
+| `RUTAEXPRESS_AUDIT` | Auditoría |
+| `RUTAEXPRESS_REPORT` | Reportes |
 
-Cambio de estado
+Ejemplo de persistencia comprobada: un envío aceptado puede generar un ticket en `RUTAEXPRESS_CATALOG.TICKETS_BODEGA` mediante el consumidor WAREHOUSE.
 
-Estados utilizados:
+## 7. Seguridad
 
-CREADO
-ACEPTADO
-EN_BODEGA
-EN_RUTA
-ENTREGADO
-CANCELADO
+La autenticación utiliza tokens JWT de Microsoft Entra ID.
 
-Cuando un envío pasa a ACEPTADO, se descuenta una unidad de capacidad del servicio seleccionado.
+El BFF protege los endpoints según los permisos del usuario.
 
-Si un envío que ya había consumido capacidad pasa a CANCELADO, la capacidad se devuelve al servicio correspondiente.
+Para las rutas administrativas se comprobaron estos escenarios:
 
-Catálogo
+| Escenario | Respuesta HTTP |
+|---|---|
+| Solicitud sin token | 401 Unauthorized |
+| Solicitud autorizada de Admin | 201 Created en creación de cola |
+| Usuario Cliente sin permiso de Admin | 403 Forbidden |
+| Petición administrativa inválida | 400 Bad Request |
 
-Catalog administra:
+Los secretos, contraseñas, tokens y claves privadas no deben incluirse en los repositorios.
 
-nombre del servicio
+## 8. Compilación
 
-tarifa base
+### Frontend Angular
 
-capacidad disponible
+El frontend se encuentra en el repositorio independiente `rutaexpress-frontend`.
 
-Endpoints principales:
+Desde la raíz de ese repositorio:
 
-GET  /api/catalog/services
-POST /api/catalog/services
-PUT  /api/catalog/services/{id}/descontar
-PUT  /api/catalog/services/{id}/devolver
+```bash
+npm ci
+npm run build
+```
 
-Auditoría
+Los archivos de producción se generan en `dist/`.
 
-Audit consume eventos desde Kafka y almacena el historial de cambios de cada envío en Oracle.
+### Microservicios Java
 
-Endpoints principales:
+Cada microservicio dispone de Maven Wrapper.
 
-GET /api/audit
-GET /api/audit/shipment/{shipmentId}
-GET /api/audit/tracking/{codigoSeguimiento}
-GET /api/audit/entregados-hoy
+En Windows, desde la carpeta raíz de cada microservicio:
 
-BFF
+```powershell
+.\mvnw.cmd -DskipTests clean package
+```
 
-El BFF funciona como punto de entrada para el frontend.
+Los archivos JAR se generan en `target/`.
 
-Rutas principales:
+El argumento `-DskipTests` omite la ejecución de las pruebas automatizadas; no equivale a ejecutar la batería completa de tests.
 
-/bff/v1/catalog
-/bff/v1/audit
-/bff/v1/report
+## 9. Despliegue en AWS
 
-Las solicitudes protegidas utilizan JWT emitidos por Microsoft Entra ID.
+La infraestructura se distribuye en instancias EC2 según la responsabilidad del componente.
 
-Infraestructura con Docker
+### `ec2-apps`
 
-El archivo docker-compose.yml se encuentra dentro de:
+Contiene los microservicios de la aplicación y Oracle.
 
-ms-rutaexpress-bff/
+Archivo de despliegue:
 
-Servicios de infraestructura:
+```text
+infra/apps/compose.yml
+```
 
-Oracle Free
+Desde la carpeta correspondiente en EC2:
 
-RabbitMQ
+```bash
+sudo docker compose up -d
+sudo docker compose ps
+```
 
-Zookeeper
+### `ec2-mq`
 
-Kafka
+Contiene el clúster RabbitMQ de dos nodos.
 
-Levantar infraestructura
+Archivo de despliegue:
 
-cd C:\backend-rutaexpress-main\ms-rutaexpress-bff
-docker compose up -d oracle rabbitmq zookeeper kafka
-docker ps
+```text
+infra/mq/compose.yml
+```
 
-Orden recomendado para ejecutar el backend
+Para comprobar el clúster:
 
-1. Shipments
+```bash
+sudo docker exec rabbitmq1 rabbitmqctl cluster_status
+```
 
-cd C:\backend-rutaexpress-main\backend
-.\mvnw.cmd spring-boot:run
+**Nota:** los comandos de despliegue requieren que las imágenes y las variables de entorno necesarias estén configuradas previamente.
 
-2. Catalog
+Las IP públicas de EC2 pueden cambiar al reiniciar el AWS Learner Lab.
 
-cd C:\backend-rutaexpress-main\ms-rutaexpress-catalog
-.\mvnw.cmd spring-boot:run
+RabbitMQ Management debe accederse de manera controlada, por ejemplo, mediante un túnel SSH. No se recomienda publicar su puerto de administración abiertamente en Internet.
 
-3. Report
+## 10. Pruebas funcionales realizadas
 
-cd C:\backend-rutaexpress-main\ms-rutaexpress-report
-.\mvnw.cmd spring-boot:run
+Durante la EP2 se comprobaron:
 
-4. Audit
+- Creación y actualización de envíos desde Angular.
+- Acceso al backend mediante API Gateway y BFF.
+- Publicación de mensajes EMAIL, LABEL y WAREHOUSE.
+- Consumo de mensajes y confirmaciones ACK.
+- Reintentos limitados y envío de errores a DLQ.
+- Registro en logs de mensajes recibidos por listeners de DLQ.
+- Métricas Ready, Unacked y Consumers en RabbitMQ Management.
+- Creación y eliminación de colas, exchanges y bindings.
+- Seguridad HTTP 401, 403 y acceso autorizado de Admin.
+- Persistencia de tickets de bodega en Oracle.
+- Compilación del frontend y de los siete proyectos Java.
 
-cd C:\backend-rutaexpress-main\ms-rutaexpress-audit
-.\mvnw.cmd spring-boot:run
+**Nota:** las notificaciones de correo se generan como archivos `.eml`. Las pruebas no acreditan envío real mediante un servidor SMTP.
 
-5. Notify
+## 11. Buenas prácticas
 
-cd C:\backend-rutaexpress-main\ms-rutaexpress-notify
-.\mvnw.cmd spring-boot:run
+- No subir archivos `.env` con credenciales reales.
+- No subir claves `.pem`, archivos privados ni tokens.
+- Utilizar variables de entorno para información sensible.
+- Mantener excluidas las carpetas `node_modules/`, `target/`, `dist/`, `bin/` y otros archivos generados.
+- No utilizar `docker compose down -v` cuando se necesite conservar datos persistentes.
+- Verificar el estado de Git antes de hacer commit y push.
+- Si una credencial quedó expuesta en el historial de Git, cambiarla de forma segura.
 
-6. BFF
+## 12. Contexto académico
 
-cd C:\backend-rutaexpress-main\ms-rutaexpress-bff
-.\mvnw.cmd spring-boot:run
-
-Oracle
-
-Service name:
-
-FREEPDB1
-
-JDBC:
-
-jdbc:oracle:thin:@//localhost:1521/FREEPDB1
-
-Las credenciales no deben publicarse en GitHub. Se recomienda usar variables de entorno o archivos locales excluidos por .gitignore.
-
-Kafka
-
-Topic principal:
-
-shipments.events
-
-Los eventos contienen:
-
-ID del envío
-
-código de seguimiento
-
-estado
-
-fecha
-
-correo del destinatario
-
-servicio
-
-RabbitMQ
-
-Configuración local:
-
-Host: localhost
-Port: 5672
-
-Panel:
-
-http://localhost:15672
-
-Seguridad
-
-El backend utiliza Spring Security como Resource Server.
-
-La autenticación se realiza mediante Microsoft Entra ID y JWT.
-
-Detener el proyecto
-
-Detener cada microservicio con:
-
-Ctrl + C
-
-Luego:
-
-docker compose down
-
-Evitar:
-
-docker compose down -v
-
-si se desea conservar la información almacenada en los volúmenes de Oracle.
-
-Antes de subir a GitHub
-
-No subir:
-
-contraseñas
-
-tokens
-
-secretos
-
-credenciales de Oracle
-
-carpetas target/
-
-configuración local sensible
-
-archivos temporales del IDE
-
-Revisar los .gitignore antes de ejecutar:
-
-git add .
-
-Proyecto académico
-
-Proyecto desarrollado como parte de una evaluación académica para la implementación de una arquitectura de microservicios aplicada a un sistema de logística y seguimiento de envíos.
+Proyecto desarrollado para la evaluación de arquitectura Cloud Native y microservicios, correspondiente a la Entrega Parcial 2 de RutaExpress.

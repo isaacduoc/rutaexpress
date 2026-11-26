@@ -2,7 +2,7 @@ services:
 
   shipments:
     build:
-      context: ../../backend
+      context: ../../../rutaexpress-shipments
     container_name: rutaexpress-shipments
     ports:
       - "8080:8080"
@@ -21,7 +21,7 @@ services:
 
   catalog:
     build:
-      context: ../../ms-rutaexpress-catalog
+      context: ../../../rutaexpress-catalog
     container_name: rutaexpress-catalog
     ports:
       - "8083:8083"
@@ -85,7 +85,7 @@ services:
 
   bff:
     build:
-      context: ../../ms-rutaexpress-bff
+      context: ../../../rutaexpress-bff
     container_name: rutaexpress-bff
     ports:
       - "8081:8081"
@@ -109,7 +109,7 @@ services:
 
   rabbit-admin:
     build:
-      context: ../../ms-rutaexpress-rabbit-admin
+      context: ../../../rutaexpress-rabbit-admin
     container_name: rutaexpress-rabbit-admin
     ports:
       - "127.0.0.1:8086:8086"
