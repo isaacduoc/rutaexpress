@@ -10,9 +10,12 @@ import org.springframework.stereotype.Service;
 public class AuditKafkaListener {
 
     private final AuditEventRepository auditEventRepository;
+    private final AuditKafkaProducer auditKafkaProducer;
 
-    public AuditKafkaListener(AuditEventRepository auditEventRepository) {
+    public AuditKafkaListener(AuditEventRepository auditEventRepository,
+                              AuditKafkaProducer auditKafkaProducer) {
         this.auditEventRepository = auditEventRepository;
+        this.auditKafkaProducer = auditKafkaProducer;
     }
 
     @KafkaListener(
@@ -31,6 +34,7 @@ public class AuditKafkaListener {
         );
 
         auditEventRepository.save(auditEvent);
+        auditKafkaProducer.publicar(evento);
 
         System.out.println(
                 "Evento recibido por Audit: "
